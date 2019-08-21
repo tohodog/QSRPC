@@ -31,7 +31,7 @@ public class RPCClientManager {
      * 需要开启,但是要注意,因为同一个连接对象netty用的同一个线程处理
      * <p>
      * 解决1,需要接收方handler里再开一个线程池处理信息(目前用这种)
-     * 解决2,需要发送方每次通过另一个连接发送,pool连接数=接收方处理线程数(pool不好处理)
+     * 解决2,需要发送方每次通过另一个连接发送,pool连接数=接收方处理线程数(pool目前还没能实现)
      * <p>
      * false:等到响应/超时才放回连接池,如果请求延迟较大,将会阻塞无法发挥最大性能,解决方法是增大连接池
      */
@@ -142,44 +142,6 @@ public class RPCClientManager {
             clientPool.returnResource(tcpClient);
             tcpClient = null;
             callback.handleError(error);
-        }
-    }
-
-    // ==================test==================
-
-    ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT)));
-
-    public Message sendSyncTest(Message request) {
-        TCPRouteClient tcpClient = clientPool.getResource();
-        if (tcpClient != null) {
-            try {
-                if (POOL_NIO) {
-                    clientPool.returnResource(tcpClient);
-                }
-                return tcpClient.sendSync(request);
-            } catch (RPCException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                if (!POOL_NIO)
-                    clientPool.returnResource(tcpClient);
-            }
-        }
-        return null;
-    }
-
-    public void sendAsyncTest(Message request, Callback<Message> callback) {
-
-        TCPRouteClient tcpClient = clientPool.getResource();
-        if (tcpClient != null) {
-            if (POOL_NIO) {
-                tcpClient.sendAsync(request, callback);
-                clientPool.returnResource(tcpClient);
-            } else {
-                tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient));
-            }
-
         }
     }
 

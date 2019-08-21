@@ -39,6 +39,14 @@ public class ServerConfig {
 
     public static Properties properties;
 
+    static {
+        try {
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void init() throws IOException {
         properties = new Properties();
         InputStream is = Object.class.getResourceAsStream(PROPRETIES_PATH);

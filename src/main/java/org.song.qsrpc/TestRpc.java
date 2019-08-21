@@ -3,12 +3,11 @@ package org.song.qsrpc;
 import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.receiver.MessageListener;
 import org.song.qsrpc.receiver.NodeLauncher;
-import org.song.qsrpc.receiver.NodeRegistry;
-import org.song.qsrpc.receiver.TCPNodeServer;
-import org.song.qsrpc.send.RPCClientManager;
 import org.song.qsrpc.send.TCPRouteClient;
 import org.song.qsrpc.send.cb.Callback;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.send.pool.ClientFactory;
+import org.song.qsrpc.send.pool.ClientPool;
+import org.song.qsrpc.send.pool.PoolConfig;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -31,58 +30,29 @@ public class TestRpc {
             DEFAULT_THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     public static int PORT;
+    static int count = 10000;
 
     public static void main(String[] args) throws IOException {
-        ServerConfig.init();
-
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
-
         NodeLauncher.start(new MessageListener() {
             @Override
             public byte[] onMessage(byte[] message) {
-
                 return (PORT + "收到").getBytes();
             }
         });
 
-        for (int i = 0; i < 1; i++) {
-            // ExecutorManager.submit(syncSINGLE);
-            // ExecutorManager.submit(asyncSINGLE);
+        for (int i = 0; i < 8; i++) {
+            // EXECUTOR_SERVICE.submit(syncSINGLE);
+//            EXECUTOR_SERVICE.submit(asyncSINGLE);
             EXECUTOR_SERVICE.submit(asyncPOOL);
-
-            // ExecutorManager.submit(asyncPOOL);
-
+//             EXECUTOR_SERVICE.submit(syncPOOL);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
-
         }
-
-//		for (int i = 0; i < 100000; i++) {
-//			msg = new Message();
-//			msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
-//			System.out.println("sendSync-" + i + " " + RPCClientManager.getInstance().sendSync(msg));
-//		}
-
-//			Socket s = new Socket("127.0.0.1", 36587);
-//
-//			for (int i = 0; i < 1; i++) {
-//				s.getOutputStream().write(ConversionUtil.intToBytes(100002));
-//				s.getOutputStream().write(ConversionUtil.intToBytes(2));
-//				s.getOutputStream().write("{}".getBytes());
-//				s.getOutputStream().write(new byte[100000]);
-//
-//				System.err.println("read" + s.getInputStream().read(new byte[100000]));
-//
-//			}
-        // s.close();
-        System.err.println("done");
-
     }
-
-    static int len = 2400;
 
     // 7s
     static Runnable asyncSINGLE = new Runnable() {
@@ -95,70 +65,12 @@ public class TestRpc {
 
             Message msg = new Message();
 
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < count; i++) {
                 msg = new Message();
                 msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
                 client.sendAsync(msg, callback);
             }
         }
-
-        Callback<Message> callback = new Callback<Message>() {
-
-            @Override
-            public void handleResult(Message result) {
-                System.out.println("sendAsync id-" + result.getId());
-
-            }
-
-            @Override
-            public void handleError(Throwable error) {
-                error.printStackTrace();
-                System.out.println("handleError-" + error);
-
-            }
-        };
-    };
-
-    static int index = 0;
-    static Runnable syncPOOL = new Runnable() {
-        @Override
-        public void run() {
-            ++index;
-
-            for (int i = 0; i < len; i++) {
-                Message msg = new Message();
-                msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
-                System.out.println("syncPOOL id-" + RPCClientManager.getInstance().sendSyncTest(msg).getId());
-            }
-        }
-    };
-
-    static Runnable asyncPOOL = new Runnable() {
-
-        @Override
-        public void run() {
-
-            for (int i = 0; i < len; i++) {
-                Message msg = new Message();
-                msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
-                RPCClientManager.getInstance().sendAsyncTest(msg, callback);
-            }
-        }
-
-        Callback<Message> callback = new Callback<Message>() {
-
-            @Override
-            public void handleResult(Message result) {
-                System.out.println("asyncPOOL id:" + result.getId() + ",c:" + result.getString());
-
-            }
-
-            @Override
-            public void handleError(Throwable error) {
-                error.printStackTrace();
-                System.out.println("handleError-" + error);
-            }
-        };
     };
 
     // 8s
@@ -169,8 +81,7 @@ public class TestRpc {
             // tcp长连接
             TCPRouteClient client = new TCPRouteClient("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT));
             client.connect();
-
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < count; i++) {
                 Message msg = new Message();
                 msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
                 try {
@@ -184,12 +95,36 @@ public class TestRpc {
     };
 
 
+    //=================使用连接池=================
+
+    static Runnable syncPOOL = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < count; i++) {
+                Message msg = new Message();
+                msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
+                System.out.println("syncPOOL id-" + sendSyncTest(msg).getId());
+            }
+        }
+    };
+
+
+    static Runnable asyncPOOL = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < count; i++) {
+                Message msg = new Message();
+                msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
+                sendAsyncTest(msg, callback);
+            }
+        }
+    };
+
     static Callback<Message> callback = new Callback<Message>() {
 
         @Override
         public void handleResult(Message result) {
             System.out.println("callback id-" + result.getId());
-
         }
 
         @Override
@@ -199,4 +134,33 @@ public class TestRpc {
 
         }
     };
+
+
+    // ==================test pool==================
+
+    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT)));
+
+    static Message sendSyncTest(Message request) {
+        TCPRouteClient tcpClient = clientPool.getResource();
+        if (tcpClient != null) {
+            try {
+                clientPool.returnResource(tcpClient);
+                return tcpClient.sendSync(request);
+            } catch (RPCException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    static void sendAsyncTest(Message request, Callback<Message> callback) {
+        TCPRouteClient tcpClient = clientPool.getResource();
+        if (tcpClient != null) {
+            tcpClient.sendAsync(request, callback);
+            clientPool.returnResource(tcpClient);
+        }
+    }
+
 }

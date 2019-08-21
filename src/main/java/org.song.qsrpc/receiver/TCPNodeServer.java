@@ -93,7 +93,6 @@ public class TCPNodeServer {
             public void run() {
                 try {
                     channel.closeFuture().sync();
-                    channel = null;
                     close();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -105,8 +104,8 @@ public class TCPNodeServer {
 
     public void close() {
         if (isConnect()) channel.close();
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        if (bossGroup != null) bossGroup.shutdownGracefully();
+        if (workerGroup != null) workerGroup.shutdownGracefully();
         channel = null;
         bossGroup = null;
         workerGroup = null;
