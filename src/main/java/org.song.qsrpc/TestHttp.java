@@ -22,7 +22,6 @@ public class TestHttp {
     public static void main(String[] args) throws Exception {
         ServerConfig.init();
 
-
         NodeInfo nodeInfo = NodeRegistry.buildNode(9000);
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override

@@ -3,7 +3,10 @@ package org.song.qsrpc.receiver;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
+import org.song.qsrpc.send.RPCClientManager;
 
 /**
  * @author song
@@ -13,6 +16,8 @@ import org.song.qsrpc.Message;
  * 同一个tcp连接所有消息会由同一个线程进行处理
  */
 public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
+
+    private static final Logger logger = LoggerFactory.getLogger(TCPNodeHandler.class);
 
     private MessageListener messageListener;
     private EventLoopGroup workerGroup;
@@ -25,8 +30,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
 
-        System.out.println(
-                "TCPNodeHandler-HandlerMessage" + msg.getId() + "-" + Thread.currentThread().getName());
+        logger.info("receiverMessage:" + msg.getId() + "," + ctx.channel());
         // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
         workerGroup.execute(new Runnable() {
             @Override

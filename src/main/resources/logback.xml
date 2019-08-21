@@ -5,7 +5,7 @@
 	<appender name="STDOUT"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -20,7 +20,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -39,7 +39,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -58,7 +58,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -77,7 +77,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -96,7 +96,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -116,7 +116,7 @@
 			<maxHistory>90</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80}: %msg%n</pattern>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
