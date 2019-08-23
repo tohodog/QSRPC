@@ -36,7 +36,7 @@ public class TestRpc {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
         NodeLauncher.start(new MessageListener() {
             @Override
-            public byte[] onMessage(byte[] message) {
+            public byte[] onMessage(Async async, byte[] message) {
                 return (PORT + "收到").getBytes();
             }
         });

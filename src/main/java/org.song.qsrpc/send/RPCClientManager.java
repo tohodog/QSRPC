@@ -76,11 +76,11 @@ public class RPCClientManager {
                     if (POOL_NIO) {
                         clientPool.returnResource(tcpClient);
                     }
+                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
                     return tcpClient.sendSync(request);
                 } finally {
                     if (!POOL_NIO)
                         clientPool.returnResource(tcpClient);
-                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
                 }
             } else {
                 throw new RPCException("can get client from pool:" + action + "," + clientPool);

@@ -24,14 +24,15 @@ public class TestHttp {
         NodeInfo nodeInfo = NodeRegistry.buildNode(9000);
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
-            public byte[] onMessage(byte[] message) {
+            public byte[] onMessage(Async async, byte[] message) {
                 return "{\"port\":9000}".getBytes();
             }
         });
         nodeInfo = NodeRegistry.buildNode(9001);
+        nodeInfo.setWeight(2);
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
-            public byte[] onMessage(byte[] message) {
+            public byte[] onMessage(Async async, byte[] message) {
                 return "{\"port\":9001}".getBytes();
             }
         });
@@ -47,7 +48,7 @@ public class TestHttp {
 
         try {
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 9; i++) {
                 Message msg_cb = RPCClientManager.getInstance().sendSync("user", msg);
 
                 System.out.println("RPCResult-" + msg_cb.getString());

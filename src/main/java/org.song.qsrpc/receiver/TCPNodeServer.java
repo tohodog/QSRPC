@@ -87,7 +87,7 @@ public class TCPNodeServer {
         }
     }
 
-    public void closeFuture() {
+    private void closeFuture() {
         new Thread(new Runnable() {
             @Override
             public void run() {

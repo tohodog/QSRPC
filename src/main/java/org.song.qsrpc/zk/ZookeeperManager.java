@@ -60,7 +60,6 @@ public class ZookeeperManager {
                 logger.info("zookeeper conenct server ok");
             } else {
                 logger.error("zookeeper conenct server timeout");
-                new RuntimeException("zookeeper conenct server timeout");
             }
         } catch (IOException | InterruptedException e) {
             logger.error("zookeeper conenct server failed", e);

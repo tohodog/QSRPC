@@ -29,15 +29,29 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-
         logger.info("receiverMessage:" + msg.getId() + "," + ctx.channel());
         // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
         workerGroup.execute(new Runnable() {
             @Override
             public void run() {
+                try {
+                    MessageListener.Async async = new MessageListener.Async() {
+                        @Override
+                        public void callBack(byte[] message) {
+                            cb(message);
+                        }
+                    };
+                    cb(messageListener.onMessage(async, msg.getContent()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            private void cb(byte[] message) {
+                if (message == null) return;
                 Message msg_cb = new Message();
                 msg_cb.setId(msg.getId());
-                msg_cb.setContent(messageListener.onMessage(msg.getContent()));
+                msg_cb.setContent(message);
                 ctx.writeAndFlush(msg_cb);
             }
         });

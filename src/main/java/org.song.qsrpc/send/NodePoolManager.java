@@ -96,6 +96,7 @@ public class NodePoolManager {
                 if (!newNoteMark.contains(mark)) {
                     ClientPool clientPool = clientPoolMap.remove(mark);
                     clientPool.destroy();
+                    iterator.remove();
                     logger.info("removeClientPool:" + mark);
                 }
             }
@@ -115,12 +116,13 @@ public class NodePoolManager {
                 return null;
             }
             NoteRequestInfo noteRequestInfo = nodeReqInfoMap.get(action);
-            noteRequestInfo.requestCount++;
 
             int nowIndex = 0;
             if (noteRequestInfo.weightSum > 0) {
                 nowIndex = noteRequestInfo.requestCount % noteRequestInfo.weightSum;
             }
+            noteRequestInfo.requestCount++;
+
             int weight = 0;
             for (NodeInfo n : actionList) {
                 weight += n.getWeight();
@@ -128,7 +130,6 @@ public class NodePoolManager {
                     return clientPoolMap.get(n.getMark());
                 }
             }
-
             return clientPoolMap.get(actionList.get(0).getMark());
         } finally {
             lock.readLock().unlock();
