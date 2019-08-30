@@ -35,7 +35,7 @@ public class RPCClientManager {
      * <p>
      * false:等到响应/超时才放回连接池,如果请求延迟较大,将会阻塞无法发挥最大性能,解决方法是增大连接池
      */
-    public static boolean POOL_NIO = true;// tcp链接不支持双工才需要false,如http
+    public static boolean POOL_NIO = true;// tcp链接协议不支持双工才需要false,如http
 
     private static volatile RPCClientManager instance;
 
