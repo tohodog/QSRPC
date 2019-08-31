@@ -104,7 +104,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.song.qsrpc.TestHttp</mainClass>
+                            <mainClass>org.song.qsrpc.TestConcurrent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -10,7 +10,9 @@ public class NodeLauncher {
 
     public static TCPNodeServer start(final NodeInfo nodeInfo, final MessageListener messageListener) {
         final TCPNodeServer tcpNodeServer = new TCPNodeServer(nodeInfo, messageListener);
-         tcpNodeServer.start();
+        tcpNodeServer.start();
+        //注册节点信息
+        NodeRegistry.registry(nodeInfo);
         return tcpNodeServer;
     }
 

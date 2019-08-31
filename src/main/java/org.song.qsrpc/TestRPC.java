@@ -17,7 +17,7 @@ import java.io.IOException;
  * <p>
  * 类说明
  */
-public class TestHttp {
+public class TestRPC {
 
     public static void main(String[] args) throws Exception {
 
@@ -37,21 +37,19 @@ public class TestHttp {
             }
         });
 
-        Message msg = new Message();
         JSONObject jsonRequest = new JSONObject();
         jsonRequest.put("i", "123");
         jsonRequest.put("m", "POST");
         jsonRequest.put("u", "/helloworld/666");
         jsonRequest.put("h", null);
         jsonRequest.put("b", "userid=1&tn=baidu&wd=%E4%B9%96%E4%B9%96%E4%B9%96".getBytes());
-        msg.setJSONObject(jsonRequest);
 
         try {
 
             for (int i = 0; i < 9; i++) {
-                Message msg_cb = RPCClientManager.getInstance().sendSync("user", msg);
+                byte[] msg_cb = RPCClientManager.getInstance().sendSync("user", jsonRequest.toJSONString().getBytes());
 
-                System.out.println("RPCResult-" + msg_cb.getString());
+                System.out.println("RPCResult-" + new String(msg_cb));
             }
         } catch (RPCException e) {
             // TODO Auto-generated catch block

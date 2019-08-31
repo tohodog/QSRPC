@@ -74,8 +74,7 @@ public class TCPNodeServer {
                     });
 
             channel = b.bind(PORT).sync().channel();//tcp监听完成
-            //注册节点信息
-            NodeRegistry.registry(nodeInfo);
+
             Log.i("NodeServer Launcher Success! ^_^ PORT:" + PORT);
             closeFuture();
             return true;

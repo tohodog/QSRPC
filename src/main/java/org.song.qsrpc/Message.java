@@ -20,7 +20,7 @@ public class Message {
 
 	private int id;
 
-	private byte type;// 内容类型,预留(比如http消息,远程调用方法消息)
+	private byte type;// 内容类型,预留(比如0全包信息 1分包信息 2分包结束)
 
 	private byte[] content;
 

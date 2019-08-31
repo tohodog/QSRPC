@@ -3,6 +3,8 @@ package org.song.qsrpc;
 import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.receiver.MessageListener;
 import org.song.qsrpc.receiver.NodeLauncher;
+import org.song.qsrpc.receiver.NodeRegistry;
+import org.song.qsrpc.receiver.TCPNodeServer;
 import org.song.qsrpc.send.TCPRouteClient;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientFactory;
@@ -21,36 +23,36 @@ import java.util.concurrent.TimeUnit;
  * @date 2018年12月26日 下午7:59:14
  * <p>
  * 类说明
+ * tcp链接性能测试
  */
-public class TestRpc {
+public class TestConcurrent {
 
     private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
-    public static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(DEFAULT_THREAD_POOL_SIZE,
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(DEFAULT_THREAD_POOL_SIZE,
             DEFAULT_THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
-    public static int PORT;
-    static int count = 10000;
+    private final static int PORT;
+    private final static int count = 10000;//请求一万次
+
+    static {
+        PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
+    }
 
     public static void main(String[] args) throws IOException {
-        PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
-        NodeLauncher.start(new MessageListener() {
+        new TCPNodeServer(NodeRegistry.buildNode(), new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
                 return (PORT + "收到").getBytes();
             }
-        });
+        }).start();
 
         for (int i = 0; i < 8; i++) {
-            // EXECUTOR_SERVICE.submit(syncSINGLE);
-//            EXECUTOR_SERVICE.submit(asyncSINGLE);
-            EXECUTOR_SERVICE.submit(asyncPOOL);
-//             EXECUTOR_SERVICE.submit(syncPOOL);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
+            // EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接
+//            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
+
+            EXECUTOR_SERVICE.submit(asyncPOOL);//异步线程池
+//             EXECUTOR_SERVICE.submit(syncPOOL);//同步线程池
         }
     }
 
@@ -60,15 +62,13 @@ public class TestRpc {
         @Override
         public void run() {
             // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT));
+            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
             client.connect();
-
-            Message msg = new Message();
-
             for (int i = 0; i < count; i++) {
-                msg = new Message();
+                Message msg = new Message();
+                msg.setId(Message.createID());
                 msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
-                client.sendAsync(msg, callback);
+                client.sendAsync(msg, callback, 10000);
             }
         }
     };
@@ -79,13 +79,14 @@ public class TestRpc {
         @Override
         public void run() {
             // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT));
+            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
             client.connect();
             for (int i = 0; i < count; i++) {
                 Message msg = new Message();
+                msg.setId(Message.createID());
                 msg.setJSONObject(JSON.parseObject("{\"name\":\"client\"}"));
                 try {
-                    System.out.println("sendAsync id-" + client.sendSync(msg).getId());
+                    System.out.println("sendAsync id-" + client.sendSync(msg, 10000).getId());
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -138,14 +139,15 @@ public class TestRpc {
 
     // ==================test pool==================
 
-    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT)));
+    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", PORT));
 
     static Message sendSyncTest(Message request) {
         TCPRouteClient tcpClient = clientPool.getResource();
         if (tcpClient != null) {
             try {
+                request.setId(Message.createID());
                 clientPool.returnResource(tcpClient);
-                return tcpClient.sendSync(request);
+                return tcpClient.sendSync(request, 10000);
             } catch (RPCException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -158,7 +160,8 @@ public class TestRpc {
     static void sendAsyncTest(Message request, Callback<Message> callback) {
         TCPRouteClient tcpClient = clientPool.getResource();
         if (tcpClient != null) {
-            tcpClient.sendAsync(request, callback);
+            request.setId(Message.createID());
+            tcpClient.sendAsync(request, callback, 10000);
             clientPool.returnResource(tcpClient);
         }
     }

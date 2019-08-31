@@ -32,6 +32,9 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
         logger.info("receiverMessage:" + msg.getId() + "," + ctx.channel());
         // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
         workerGroup.execute(new Runnable() {
+
+            boolean flag;
+
             @Override
             public void run() {
                 try {
@@ -49,10 +52,13 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
             private void cb(byte[] message) {
                 if (message == null) return;
+                if (flag) throw new IllegalStateException("Has been called back!");
+
                 Message msg_cb = new Message();
                 msg_cb.setId(msg.getId());
                 msg_cb.setContent(message);
                 ctx.writeAndFlush(msg_cb);
+                flag = true;
             }
         });
     }

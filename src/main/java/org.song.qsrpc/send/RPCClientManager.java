@@ -1,5 +1,6 @@
 package org.song.qsrpc.send;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
@@ -62,25 +63,43 @@ public class RPCClientManager {
      * <p>
      * 访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好,
      * <p>
-     * 路由RPC不建议用
+     * 作为主请求路由RPC强烈不建议用
      *
      * @throws InterruptedException
      * @throws RPCException
      */
-    public Message sendSync(String action, Message request) throws RPCException, InterruptedException {
+    public byte[] sendSync(String action, byte[] content) throws RPCException, InterruptedException {
+        return sendSync(action, content, ReadTimeout);
+    }
+
+    /**
+     * 同步发送,阻塞,
+     * <p>
+     * 访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好,
+     * <p>
+     * 作为主请求路由RPC强烈不建议用
+     *
+     * @throws InterruptedException
+     * @throws RPCException
+     */
+    public byte[] sendSync(String action, byte[] content, int timeout) throws RPCException, InterruptedException {
         ClientPool clientPool = nodePoolManager.chooseClientPool(action);
         if (clientPool != null) {
             TCPRouteClient tcpClient = clientPool.getResource();
             if (tcpClient != null) {
                 try {
+                    Message request = new Message();
+                    request.setId(Message.createID());
+                    request.setContent(content);
                     if (POOL_NIO) {
                         clientPool.returnResource(tcpClient);
                     }
                     logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
-                    return tcpClient.sendSync(request);
+                    return tcpClient.sendSync(request, timeout).getContent();
                 } finally {
-                    if (!POOL_NIO)
+                    if (!POOL_NIO) {
                         clientPool.returnResource(tcpClient);
+                    }
                 }
             } else {
                 throw new RPCException("can get client from pool:" + action + "," + clientPool);
@@ -92,18 +111,27 @@ public class RPCClientManager {
     }
 
     /**
-     * 异步发送,nio
+     * 异步回调,nio
      */
-    public boolean sendAsync(String action, Message request, Callback<Message> callback) {
+    public boolean sendAsync(String action, byte[] content, Callback<byte[]> callback) {
+        return sendAsync(action, content, callback, ReadTimeout);
+    }
+
+    /**
+     * 异步回调,nio
+     */
+    public boolean sendAsync(String action, byte[] content, Callback<byte[]> callback, int timeout) {
         ClientPool clientPool = nodePoolManager.chooseClientPool(action);
         if (clientPool != null) {
             TCPRouteClient tcpClient = clientPool.getResource();
             if (tcpClient != null) {
+                Message request = new Message();
+                request.setId(Message.createID());
+                request.setContent(content);
+
+                tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient), timeout);
                 if (POOL_NIO) {
-                    tcpClient.sendAsync(request, callback);
                     clientPool.returnResource(tcpClient);
-                } else {
-                    tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient));
                 }
                 logger.info("sendAsync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
             } else {
@@ -120,11 +148,11 @@ public class RPCClientManager {
     // 包装异步回调,异步释放pool链接
     private static class AsyncCallback implements Callback<Message> {
 
-        private Callback<Message> callback;
+        private Callback<byte[]> callback;
         private TCPRouteClient tcpClient;
         private ClientPool clientPool;
 
-        AsyncCallback(Callback<Message> callback, ClientPool clientPool, TCPRouteClient tcpClient) {
+        AsyncCallback(Callback<byte[]> callback, ClientPool clientPool, TCPRouteClient tcpClient) {
             this.callback = callback;
             this.clientPool = clientPool;
             this.tcpClient = tcpClient;
@@ -132,14 +160,18 @@ public class RPCClientManager {
 
         @Override
         public void handleResult(Message result) {
-            clientPool.returnResource(tcpClient);
+            if (!POOL_NIO) {
+                clientPool.returnResource(tcpClient);
+            }
             tcpClient = null;
-            callback.handleResult(result);
+            callback.handleResult(result.getContent());
         }
 
         @Override
         public void handleError(Throwable error) {
-            clientPool.returnResource(tcpClient);
+            if (!POOL_NIO) {
+                clientPool.returnResource(tcpClient);
+            }
             tcpClient = null;
             callback.handleError(error);
         }

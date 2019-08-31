@@ -71,11 +71,11 @@ public class NodePoolManager {
                     List<NodeInfo> actionList = nodeInfoMap.get(action);
                     if (actionList == null) {
                         actionList = new ArrayList<>();
+                        nodeInfoMap.put(action, actionList);
                         nodeReqInfoMap.put(action, new NoteRequestInfo());
                     }
                     actionList.add(nodeInfo);
                     nodeReqInfoMap.get(action).weightSum += nodeInfo.getWeight();
-                    nodeInfoMap.put(action, actionList);
                 }
             }
 
