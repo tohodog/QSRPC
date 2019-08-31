@@ -12,30 +12,20 @@ import java.util.Properties;
  * 服务器配置
  */
 public class ServerConfig {
+    private final static String PROPRETIES_PATH = "/application.properties";
 
-    public static String KEY_PROT = "server.app.port";
-    public static String KEY_API_PACKAGE = "server.api.package";
+    public final static String KEY_RPC_ZK_IPS = "rpc.zk.ips";
+    public final static String KEY_RPC_ZK_PATH = "rpc.zk.path";
 
-
-    public static String KEY_RPC_ZK_IPS = "rpc.zk.ips";
-    public static String KEY_RPC_ZK_PATH = "rpc.zk.path";
-
-    public static String KEY_RPC_NODE_IP = "rpc.node.ip";
-    public static String KEY_RPC_NODE_PORT = "rpc.node.port";
-    public static String KEY_RPC_NODE_ACTION = "rpc.node.action";
+    public final static String KEY_RPC_NODE_IP = "rpc.node.ip";
+    public final static String KEY_RPC_NODE_PORT = "rpc.node.port";
+    public final static String KEY_RPC_NODE_ACTION = "rpc.node.action";
 
 
-    public static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
-    public static String KEY_SSL_JKS_PASSWORD = "server.ssl.jks.password";
+    public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
+    public final static String KEY_SSL_JKS_PASSWORD = "server.ssl.jks.password";
+    public final static String KEY_SSL_CERT_PATH = "server.ssl.cert.path";
 
-    public static String KEY_SSL_CERT_PATH = "server.ssl.cert.path";
-
-    public static String KEY_API_LOG = "server.api.access.log";
-    public static String KEY_STATIC_PATH_PUB = "server.static.path.public";
-    public static String KEY_STATIC_PATH_PRI = "server.static.path.private";
-
-
-    private static String PROPRETIES_PATH = "/application.properties";
 
     public static Properties properties;
 

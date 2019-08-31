@@ -21,22 +21,27 @@ public class TestRPC {
 
     public static void main(String[] args) throws Exception {
 
+        //开启两个节点服务器
         NodeInfo nodeInfo = NodeRegistry.buildNode(9000);
+        nodeInfo.setAction("user,order");
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
-                return "{\"port\":9000}".getBytes();
-            }
-        });
-        nodeInfo = NodeRegistry.buildNode(9001);
-        nodeInfo.setWeight(2);
-        NodeLauncher.start(nodeInfo, new MessageListener() {
-            @Override
-            public byte[] onMessage(Async async, byte[] message) {
-                return "{\"port\":9001}".getBytes();
+                return "9000回复你啦".getBytes();
             }
         });
 
+        NodeInfo nodeInfo2 = NodeRegistry.buildNode(9001);
+        nodeInfo2.setWeight(2);
+        nodeInfo2.setAction("order");
+        NodeLauncher.start(nodeInfo2, new MessageListener() {
+            @Override
+            public byte[] onMessage(Async async, byte[] message) {
+                return "9001回复你啦".getBytes();
+            }
+        });
+
+        //发送消息
         JSONObject jsonRequest = new JSONObject();
         jsonRequest.put("i", "123");
         jsonRequest.put("m", "POST");
@@ -48,8 +53,11 @@ public class TestRPC {
 
             for (int i = 0; i < 9; i++) {
                 byte[] msg_cb = RPCClientManager.getInstance().sendSync("user", jsonRequest.toJSONString().getBytes());
-
-                System.out.println("RPCResult-" + new String(msg_cb));
+                System.out.println("send [user] Result-" + new String(msg_cb));
+            }
+            for (int i = 0; i < 9; i++) {
+                byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", jsonRequest.toJSONString().getBytes());
+                System.out.println("send [order] Result-" + new String(msg_cb));
             }
         } catch (RPCException e) {
             // TODO Auto-generated catch block

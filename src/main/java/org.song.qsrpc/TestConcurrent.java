@@ -34,6 +34,7 @@ public class TestConcurrent {
 
     private final static int PORT;
     private final static int count = 10000;//请求一万次
+    private final static int thread = 8;
 
     static {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
@@ -47,7 +48,9 @@ public class TestConcurrent {
             }
         }).start();
 
-        for (int i = 0; i < 8; i++) {
+        Log.i("start ok!");
+
+        for (int i = 0; i < thread; i++) {
             // EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接
 //            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
 
