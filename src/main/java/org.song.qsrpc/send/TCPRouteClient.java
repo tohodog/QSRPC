@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class TCPRouteClient {
 
     // 连接配置,需要再独立成配置类
-    private static final int connTimeout = 8 * 1000;
+    private static final int connTimeout = 18 * 1000;
 
     private static final boolean soKeepalive = true;
 

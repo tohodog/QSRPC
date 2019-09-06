@@ -35,8 +35,8 @@ public class ZookeeperManager {
         this.registryAddress = registryAddress;
         this.rootPath = rootPath;
         zookeeper = connectServer();
-		checkRootNode();
-	}
+        checkRootNode();
+    }
 
     /**
      * 链接ZooKeeper,阻塞,超时10s
@@ -47,7 +47,7 @@ public class ZookeeperManager {
             zk = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 @Override
                 public void process(WatchedEvent event) {
-                    logger.info("WatchedEvent:" + event.getState());
+                    logger.info("WatchedEvent.connectServer:" + event.getState());
 
                     if (event.getState() == Event.KeeperState.SyncConnected) {
                         latch.countDown();
@@ -67,12 +67,15 @@ public class ZookeeperManager {
         return zk;
     }
 
+    private WatchNode watchNode;
+
     public void watchNode(final WatchNode watchNode) {
+        this.watchNode = watchNode;
         try {
             List<String> serverList = zookeeper.getChildren(rootPath, new Watcher() {
                 @Override
                 public void process(WatchedEvent event) {
-                    logger.info("WatchedEvent:" + event.getState());
+                    logger.info("WatchedEvent.watchNode:" + event.getState());
                     if (event.getType() == Event.EventType.NodeChildrenChanged) {
                         watchNode(watchNode);
                     }

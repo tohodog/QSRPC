@@ -33,8 +33,8 @@ public class TestConcurrent {
             DEFAULT_THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
-    private final static int count = 10000;//请求一万次
-    private final static int thread = 8;
+    private final static int count = 1;//请求一万次
+    private final static int thread = 1;
 
     static {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);

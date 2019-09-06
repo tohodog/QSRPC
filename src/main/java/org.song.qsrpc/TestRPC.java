@@ -36,14 +36,20 @@ public class TestRPC {
         nodeInfo2.setAction("order");
         NodeLauncher.start(nodeInfo2, new MessageListener() {
             @Override
-            public byte[] onMessage(Async async, byte[] message) {
-                return "9001回复你啦".getBytes();
+            public byte[] onMessage(final Async async, byte[] message) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        async.callBack("9001回复你啦".getBytes());
+                    }
+                }).start();
+                return null;
             }
         });
 
-        //发送消息
+        //发送消息（转发http）
         JSONObject jsonRequest = new JSONObject();
-        jsonRequest.put("i", "123");
+        jsonRequest.put("i", "192.168.1.1");
         jsonRequest.put("m", "POST");
         jsonRequest.put("u", "/helloworld/666");
         jsonRequest.put("h", null);

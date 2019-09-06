@@ -63,34 +63,40 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
         });
     }
 
+
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        System.out.println("TCPNodeHandler-channelRegistered(" + ctx + ")");
+        logger.info("channelRegistered(" + ctx + ")");
+
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        System.out.println("TCPNodeHandler-channelActive(" + ctx + ")");
+        logger.info("channelActive(" + ctx + ")");
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        System.out.println("TCPNodeHandler-channelInactive(" + ctx + ")");
+        logger.info("channelInactive(" + ctx + ")");
+
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        System.out.println("TCPNodeHandler-channelUnregistered(" + ctx + ")");
+        logger.info("channelUnregistered(" + ctx + ")");
+
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        System.out.println("TCPNodeHandler-exceptionCaught(" + ctx + ")\n" + cause);
+        logger.error("exceptionCaught(" + ctx + ")", cause);
+
     }
 
 }
