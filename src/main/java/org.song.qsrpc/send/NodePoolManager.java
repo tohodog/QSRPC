@@ -41,6 +41,7 @@ public class NodePoolManager {
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
 
+            //监听节点信息
             @Override
             public void onNodeDataChange(List<byte[]> nodeDatas) {
                 List<NodeInfo> nodeInfos = new ArrayList<>();
@@ -80,20 +81,20 @@ public class NodePoolManager {
             }
 
             // 新建新加节点连接池
-            Set<String> newNoteMark = new HashSet<>();
+            Set<String> newNodeMark = new HashSet<>();
             for (NodeInfo nodeInfo : nodeDatas) {
                 String mark = nodeInfo.getMark();
-                newNoteMark.add(mark);
+                newNodeMark.add(mark);
                 if (!clientPoolMap.containsKey(mark)) {
                     clientPoolMap.put(nodeInfo.getMark(), buildClientPool(nodeInfo));
-                    logger.info("createClientPool:" + mark);
+                    logger.info("createClientPool:" + mark + "-" + nodeInfo.getAction());
                 }
             }
             // 移除不存在节点连接池
             Iterator<String> iterator = clientPoolMap.keySet().iterator();
             while (iterator.hasNext()) {
                 String mark = iterator.next();
-                if (!newNoteMark.contains(mark)) {
+                if (!newNodeMark.contains(mark)) {
                     ClientPool clientPool = clientPoolMap.remove(mark);
                     clientPool.destroy();
                     iterator.remove();

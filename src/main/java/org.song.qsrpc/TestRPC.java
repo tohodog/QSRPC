@@ -27,7 +27,7 @@ public class TestRPC {
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
-                return "9000回复你啦".getBytes();
+                return "9000 callback".getBytes();
             }
         });
 
@@ -40,7 +40,7 @@ public class TestRPC {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        async.callBack("9001回复你啦".getBytes());
+                        async.callBack("9001 callback".getBytes());
                     }
                 }).start();
                 return null;
@@ -59,11 +59,11 @@ public class TestRPC {
 
             for (int i = 0; i < 9; i++) {
                 byte[] msg_cb = RPCClientManager.getInstance().sendSync("user", jsonRequest.toJSONString().getBytes());
-                System.out.println("send [user] Result-" + new String(msg_cb));
+                System.out.println("send [user] Result: " + new String(msg_cb));
             }
             for (int i = 0; i < 9; i++) {
                 byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", jsonRequest.toJSONString().getBytes());
-                System.out.println("send [order] Result-" + new String(msg_cb));
+                System.out.println("send [order] Result: " + new String(msg_cb));
             }
         } catch (RPCException e) {
             // TODO Auto-generated catch block

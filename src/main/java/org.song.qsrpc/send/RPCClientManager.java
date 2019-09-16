@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
 import org.song.qsrpc.RPCException;
+import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientPool;
 
@@ -18,7 +19,15 @@ public class RPCClientManager {
 
     private static final Logger logger = LoggerFactory.getLogger(RPCClientManager.class);
 
-    public static final int ReadTimeout = 18 * 1000;
+    public static final int ReadTimeout;
+
+    static {
+        if (ServerConfig.containsKey(ServerConfig.KEY_RPC_CONNECT_TIMEOUT)) {
+            ReadTimeout = ServerConfig.getInt(ServerConfig.KEY_RPC_CONNECT_TIMEOUT);
+        } else {
+            ReadTimeout = 18 * 1000;
+        }
+    }
 
     /**
      * true:

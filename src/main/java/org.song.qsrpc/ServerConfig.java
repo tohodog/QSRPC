@@ -14,12 +14,13 @@ import java.util.Properties;
 public class ServerConfig {
     private final static String PROPRETIES_PATH = "/application.properties";
 
-    public final static String KEY_RPC_ZK_IPS = "rpc.zk.ips";
-    public final static String KEY_RPC_ZK_PATH = "rpc.zk.path";
+    public final static String KEY_RPC_ZK_IPS = "qsrpc.zk.ips";
+    public final static String KEY_RPC_ZK_PATH = "qsrpc.zk.path";
 
-    public final static String KEY_RPC_NODE_IP = "rpc.node.ip";
-    public final static String KEY_RPC_NODE_PORT = "rpc.node.port";
-    public final static String KEY_RPC_NODE_ACTION = "rpc.node.action";
+    public final static String KEY_RPC_NODE_IP = "qsrpc.node.ip";
+    public final static String KEY_RPC_NODE_PORT = "qsrpc.node.port";
+    public final static String KEY_RPC_NODE_ACTION = "qsrpc.node.action";
+    public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
 
 
     public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
