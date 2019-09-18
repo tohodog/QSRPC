@@ -40,21 +40,19 @@ public class NodePoolManager {
         String path = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
-
             //监听节点信息
             @Override
             public void onNodeDataChange(List<byte[]> nodeDatas) {
-                List<NodeInfo> nodeInfos = new ArrayList<>();
-                for (byte[] bytes : nodeDatas) {
-                    try {
+                try {
+                    List<NodeInfo> nodeInfos = new ArrayList<>();
+                    for (byte[] bytes : nodeDatas) {
                         nodeInfos.add(JSON.parseObject(new String(bytes), NodeInfo.class));
-                    } catch (Exception e) {
-                        logger.error("onNodeDataChange.ERROR", e);
                     }
+                    logger.info("onNodeDataChange->" + nodeInfos.size() + "=" + JSON.toJSONString(nodeInfos));
+                    onNodeChange(nodeInfos);
+                } catch (Exception e) {
+                    logger.error("onNodeDataChange.ERROR", e);
                 }
-
-                logger.info("onNodeDataChange->" + nodeInfos.size() + "=" + JSON.toJSONString(nodeInfos));
-                onNodeChange(nodeInfos);
             }
         });
     }
@@ -62,9 +60,31 @@ public class NodePoolManager {
     private void onNodeChange(List<NodeInfo> nodeDatas) {
         try {
             lock.writeLock().lock();
+
+            // 新建新加节点连接池
+            Set<String> newNodeMark = new HashSet<>();
+            for (NodeInfo nodeInfo : nodeDatas) {
+                String mark = nodeInfo.getMark();
+                newNodeMark.add(mark);
+                if (!clientPoolMap.containsKey(mark)) {
+                    clientPoolMap.put(nodeInfo.getMark(), buildClientPool(nodeInfo));
+                    logger.info("createClientPool:" + mark);
+                }
+            }
+            // 移除不存在节点连接池
+            Iterator<String> iterator = clientPoolMap.keySet().iterator();
+            while (iterator.hasNext()) {
+                String mark = iterator.next();
+                if (!newNodeMark.contains(mark)) {
+                    ClientPool clientPool = clientPoolMap.get(mark);
+                    clientPool.destroy();
+                    iterator.remove();
+                    logger.info("removeClientPool:" + mark);
+                }
+            }
+
             nodeInfoMap.clear();
             nodeReqInfoMap.clear();
-
             // 把节点按action分组,也就是同样服务功能的服务器放一起
             for (NodeInfo nodeInfo : nodeDatas) {
                 String[] actions = nodeInfo.getAction().split(",");
@@ -75,32 +95,14 @@ public class NodePoolManager {
                         nodeInfoMap.put(action, actionList);
                         nodeReqInfoMap.put(action, new NoteRequestInfo());
                     }
-                    actionList.add(nodeInfo);
-                    nodeReqInfoMap.get(action).weightSum += nodeInfo.getWeight();
+                    //10秒内重启服务器会出现重复节点,处理下
+                    if (!actionList.contains(nodeInfo)) {
+                        actionList.add(nodeInfo);
+                        nodeReqInfoMap.get(action).weightSum += nodeInfo.getWeight();
+                    }
                 }
             }
 
-            // 新建新加节点连接池
-            Set<String> newNodeMark = new HashSet<>();
-            for (NodeInfo nodeInfo : nodeDatas) {
-                String mark = nodeInfo.getMark();
-                newNodeMark.add(mark);
-                if (!clientPoolMap.containsKey(mark)) {
-                    clientPoolMap.put(nodeInfo.getMark(), buildClientPool(nodeInfo));
-                    logger.info("createClientPool:" + mark + "-" + nodeInfo.getAction());
-                }
-            }
-            // 移除不存在节点连接池
-            Iterator<String> iterator = clientPoolMap.keySet().iterator();
-            while (iterator.hasNext()) {
-                String mark = iterator.next();
-                if (!newNodeMark.contains(mark)) {
-                    ClientPool clientPool = clientPoolMap.remove(mark);
-                    clientPool.destroy();
-                    iterator.remove();
-                    logger.info("removeClientPool:" + mark);
-                }
-            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -120,7 +122,7 @@ public class NodePoolManager {
 
             int nowIndex = 0;
             if (noteRequestInfo.weightSum > 0) {
-                nowIndex = noteRequestInfo.requestCount % noteRequestInfo.weightSum;
+                nowIndex = (int) (noteRequestInfo.requestCount % noteRequestInfo.weightSum);
             }
             noteRequestInfo.requestCount++;
 
@@ -132,10 +134,11 @@ public class NodePoolManager {
                 }
             }
             return clientPoolMap.get(actionList.get(0).getMark());
+
         } finally {
             lock.readLock().unlock();
-
         }
+
     }
 
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
@@ -151,7 +154,7 @@ public class NodePoolManager {
     // 某个action节点组请求统计,方便扩展功能
     // 目前实现按权重分配
     public static class NoteRequestInfo {
-        public int requestCount;
+        public long requestCount;
         public int weightSum;
 
     }

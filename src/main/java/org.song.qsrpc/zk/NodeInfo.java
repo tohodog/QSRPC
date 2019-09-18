@@ -1,5 +1,7 @@
 package org.song.qsrpc.zk;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * @author song
  * @Email vipqinsong@gmail.com
@@ -44,6 +46,7 @@ public class NodeInfo {
 
     public void setAction(String action) {
         this.action = action;
+        mark = null;
     }
 
     public String getIp() {
@@ -52,6 +55,7 @@ public class NodeInfo {
 
     public void setIp(String ip) {
         this.ip = ip;
+        mark = null;
     }
 
     public int getPort() {
@@ -60,6 +64,7 @@ public class NodeInfo {
 
     public void setPort(int port) {
         this.port = port;
+        mark = null;
     }
 
     public int getCoreThread() {
@@ -68,6 +73,7 @@ public class NodeInfo {
 
     public void setCoreThread(int coreThread) {
         this.coreThread = coreThread;
+        mark = null;
     }
 
     public int getWeight() {
@@ -76,6 +82,7 @@ public class NodeInfo {
 
     public void setWeight(int weight) {
         this.weight = weight;
+        mark = null;
     }
 
     public boolean isBackup() {
@@ -96,11 +103,23 @@ public class NodeInfo {
 
     /**
      * 节点唯一标识
+     * 加入后面的配置区分改配置重启节点重复问题
      *
      * @return IP + ":" + port
      */
+    private String mark;
+
+    @JSONField(serialize = false)
     public String getMark() {
-        return ip + ":" + port;
+        return mark != null ? mark : (mark = ip + ":" + port + "_" + action + "_" + weight + "_" + coreThread);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof NodeInfo) {
+            NodeInfo o1 = (NodeInfo) o;
+            return this.getMark().equals(o1.getMark());
+        }
+        return false;
+    }
 }

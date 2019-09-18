@@ -16,10 +16,14 @@ public class ServerConfig {
 
     public final static String KEY_RPC_ZK_IPS = "qsrpc.zk.ips";
     public final static String KEY_RPC_ZK_PATH = "qsrpc.zk.path";
+    public final static String KEY_RPC_ZK_USERNAME = "qsrpc.zk.username";
+    public final static String KEY_RPC_ZK_PASSWORD = "qsrpc.zk.password";
 
     public final static String KEY_RPC_NODE_IP = "qsrpc.node.ip";
     public final static String KEY_RPC_NODE_PORT = "qsrpc.node.port";
     public final static String KEY_RPC_NODE_ACTION = "qsrpc.node.action";
+    public final static String KEY_RPC_NODE_WEIGHT = "qsrpc.node.weight";
+
     public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
 
 
@@ -28,20 +32,16 @@ public class ServerConfig {
     public final static String KEY_SSL_CERT_PATH = "server.ssl.cert.path";
 
 
-    public static Properties properties;
+    public final static Properties properties;
 
     static {
+        properties = new Properties();
         try {
-            init();
+            InputStream is = Object.class.getResourceAsStream(PROPRETIES_PATH);
+            properties.load(is);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void init() throws IOException {
-        properties = new Properties();
-        InputStream is = Object.class.getResourceAsStream(PROPRETIES_PATH);
-        properties.load(is);
     }
 
     public static int getInt(String key) {

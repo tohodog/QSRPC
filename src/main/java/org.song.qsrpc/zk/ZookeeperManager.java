@@ -35,7 +35,6 @@ public class ZookeeperManager {
         this.registryAddress = registryAddress;
         this.rootPath = rootPath;
         zookeeper = connectServer();
-        checkRootNode();
     }
 
     /**
@@ -72,6 +71,7 @@ public class ZookeeperManager {
     public void watchNode(final WatchNode watchNode) {
         this.watchNode = watchNode;
         try {
+            checkRootNode();
             List<String> serverList = zookeeper.getChildren(rootPath, new Watcher() {
                 @Override
                 public void process(WatchedEvent event) {
@@ -106,11 +106,15 @@ public class ZookeeperManager {
     }
 
     public boolean createChildNode(String nodeName, byte[] datas) {
+        return createChildNode(nodeName, datas, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    }
+
+    public boolean createChildNode(String nodeName, byte[] datas, List<ACL> acls) {
         try {
             checkRootNode();
-            zookeeper.create(rootPath + "/" + nodeName, datas, ZooDefs.Ids.OPEN_ACL_UNSAFE,
+            zookeeper.create(rootPath + "/" + nodeName, datas, acls,
                     CreateMode.EPHEMERAL_SEQUENTIAL);
-            logger.info("createChildNode:" + nodeName + "=" + new String(datas));
+            logger.info("createChildNode->" + nodeName + "=" + new String(datas));
             return true;
         } catch (KeeperException e) {
             logger.error("KeeperException", e);
@@ -121,10 +125,21 @@ public class ZookeeperManager {
     }
 
     private void checkRootNode() {
+        checkRootNode(ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    }
+
+    private void checkRootNode(List<ACL> acls) {
         try {
-            Stat s = zookeeper.exists(rootPath, false);
-            if (s == null) {
-                zookeeper.create(rootPath, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            String[] arr = rootPath.split("/");
+            String path = "";
+            for (String s : arr) {
+                if (s.isEmpty()) continue;
+                path += "/" + s;
+                Stat stat = zookeeper.exists(path, false);
+                if (stat == null) {
+                    zookeeper.create(path, new byte[0], acls, CreateMode.PERSISTENT);
+                    logger.info("createPath:" + path);
+                }
             }
         } catch (KeeperException e) {
             logger.error("KeeperException", e);

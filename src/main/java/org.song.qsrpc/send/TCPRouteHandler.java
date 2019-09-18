@@ -24,7 +24,7 @@ public class TCPRouteHandler extends SimpleChannelInboundHandler<Message> {
 
         //System.out.println("TCPRouteHandler-HandlerMessage:" + msg.getId() + "-" + Thread.currentThread().getName());
         @SuppressWarnings("unchecked")
-        Callback<Message> cb = (Callback<Message>) CallbackPool.remove(String.valueOf(msg.getId()));
+        Callback<Message> cb = (Callback<Message>) CallbackPool.remove(msg.getId());
         if (cb == null) {
             //找不到回调//可能超时被清理了
             logger.warn("Receive msg from server but no context found, requestId=" + msg.getId() + "," + ctx);

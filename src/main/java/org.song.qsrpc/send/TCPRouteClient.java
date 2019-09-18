@@ -145,7 +145,7 @@ public class TCPRouteClient {
      */
     public void sendAsync(Message request, Callback<Message> callback, int timeout) {
         if (isConnect()) {
-            CallbackPool.put(String.valueOf(request.getId()), callback, timeout);
+            CallbackPool.put(request.getId(), callback, timeout);
             channel.writeAndFlush(request);
         } else {
             callback.handleError(new RPCException(this.getClass().getName() + "-can no connect:" + getInfo()));
@@ -159,12 +159,12 @@ public class TCPRouteClient {
     public Message sendSync(Message request, int timeout) throws InterruptedException, RPCException {
         if (isConnect()) {
             CallFuture<Message> future = CallFuture.newInstance();
-            CallbackPool.put(String.valueOf(request.getId()), future);
+            CallbackPool.put(request.getId(), future);
             channel.writeAndFlush(request);
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } finally {
-                CallbackPool.remove(String.valueOf(request.getId()));
+                CallbackPool.remove(request.getId());
             }
         } else {
             throw new RPCException("TCPClient.sendSync() can no connect:" + getInfo());

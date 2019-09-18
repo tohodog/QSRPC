@@ -27,12 +27,15 @@ public class NodeRegistry {
         String node_ip = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_IP);
         if (node_ip == null) node_ip = AddressUtils.getInnetIp();
         String node_action = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ACTION);
+        String weight = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_WEIGHT);
 
         NodeInfo nodeInfo = new NodeInfo();
         nodeInfo.setAction(node_action);
         nodeInfo.setIp(node_ip);
         nodeInfo.setPort(port);
-
+        if (weight != null) {
+            nodeInfo.setWeight(Integer.parseInt(weight));
+        }
         nodeInfo.setZkIps(zkIps);
         nodeInfo.setZkPath(zkPath);
 

@@ -32,7 +32,7 @@ public class CallbackPool {
     /**
      * 保存键为调用的唯一标示requestId</tt>
      */
-    private static ConcurrentHashMap<Object, Callback<?>> CALLBACK_MAP = new ConcurrentHashMap<Object, Callback<?>>(
+    private static ConcurrentHashMap<Object, Callback<?>> CALLBACK_MAP = new ConcurrentHashMap<>(
             INITIAL_CAPACITY, LOAD_FACTOR, CONCURRENCY_LEVEL);
 
     private static ConcurrentHashMap<Object, ScheduledFuture<?>> TIMEOUT_MAP = new ConcurrentHashMap<>(INITIAL_CAPACITY,
@@ -45,7 +45,7 @@ public class CallbackPool {
      * @param callback  客户端句柄callback
      * @param timeout   客户端调用超时
      */
-    public static void put(final Object requestId, Callback<?> callback, int timeout) {
+    public static void put(final Integer requestId, Callback<?> callback, int timeout) {
         CALLBACK_MAP.putIfAbsent(requestId, callback);
         if (timeout > 0) {
             TIMEOUT_MAP.putIfAbsent(requestId, SCHEDULED_EXECUTOR_SERVICE.schedule(new Runnable() {
@@ -62,7 +62,7 @@ public class CallbackPool {
         }
     }
 
-    public static void put(Object requestId, Callback<?> callback) {
+    public static void put(Integer requestId, Callback<?> callback) {
         put(requestId, callback, 0);
     }
 
@@ -71,7 +71,7 @@ public class CallbackPool {
      *
      * @param requestId
      */
-    public static Callback<?> remove(Object requestId) {
+    public static Callback<?> remove(Integer requestId) {
         ScheduledFuture<?> scheduledFuture = TIMEOUT_MAP.remove(requestId);
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);

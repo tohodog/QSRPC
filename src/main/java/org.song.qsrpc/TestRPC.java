@@ -6,6 +6,7 @@ import org.song.qsrpc.receiver.NodeLauncher;
 import org.song.qsrpc.receiver.NodeRegistry;
 import org.song.qsrpc.receiver.TCPNodeServer;
 import org.song.qsrpc.send.RPCClientManager;
+import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.zk.NodeInfo;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class TestRPC {
         //开启两个节点服务器
         NodeInfo nodeInfo = NodeRegistry.buildNode(9000);
         nodeInfo.setAction("user,order");
+        nodeInfo.setWeight(2);
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
@@ -32,7 +34,7 @@ public class TestRPC {
         });
 
         NodeInfo nodeInfo2 = NodeRegistry.buildNode(9001);
-        nodeInfo2.setWeight(2);
+        nodeInfo2.setWeight(1);
         nodeInfo2.setAction("order");
         NodeLauncher.start(nodeInfo2, new MessageListener() {
             @Override
@@ -56,21 +58,28 @@ public class TestRPC {
         jsonRequest.put("b", "userid=1&tn=baidu&wd=%E4%B9%96%E4%B9%96%E4%B9%96".getBytes());
 
         try {
-
-            for (int i = 0; i < 9; i++) {
-                byte[] msg_cb = RPCClientManager.getInstance().sendSync("user", jsonRequest.toJSONString().getBytes());
-                System.out.println("send [user] Result: " + new String(msg_cb));
-            }
             for (int i = 0; i < 9; i++) {
                 byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", jsonRequest.toJSONString().getBytes());
                 System.out.println("send [order] Result: " + new String(msg_cb));
             }
-        } catch (RPCException e) {
-            // TODO Auto-generated catch block
+            Thread.sleep(100);
+        } catch (RPCException | InterruptedException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        }
+
+        for (int i = 0; i < 9; i++) {
+            RPCClientManager.getInstance().sendAsync("user", jsonRequest.toJSONString().getBytes(),
+                    new Callback<byte[]>() {
+                        @Override
+                        public void handleResult(byte[] result) {
+                            System.out.println("send [user] Result: " + new String(result));
+                        }
+
+                        @Override
+                        public void handleError(Throwable error) {
+                            error.printStackTrace();
+                        }
+                    });
         }
 
     }
