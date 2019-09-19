@@ -46,7 +46,12 @@ public class NodePoolManager {
                 try {
                     List<NodeInfo> nodeInfos = new ArrayList<>();
                     for (byte[] bytes : nodeDatas) {
-                        nodeInfos.add(JSON.parseObject(new String(bytes), NodeInfo.class));
+                        try {
+                            NodeInfo nodeInfo = JSON.parseObject(new String(bytes), NodeInfo.class);
+                            if (nodeInfo != null) nodeInfos.add(nodeInfo);
+                        } catch (Exception e) {
+                            logger.error("onNodeDataChange.parseObject", e);
+                        }
                     }
                     logger.info("onNodeDataChange->" + nodeInfos.size() + "=" + JSON.toJSONString(nodeInfos));
                     onNodeChange(nodeInfos);

@@ -15,9 +15,13 @@ import org.song.qsrpc.zk.ZookeeperManager;
  */
 public class NodeRegistry {
 
-    public static void registry(NodeInfo nodeInfo) {
+    public static ZookeeperManager registry(NodeInfo nodeInfo) {
         ZookeeperManager zookeeperManager = new ZookeeperManager(nodeInfo.getZkIps(), nodeInfo.getZkPath());
-        zookeeperManager.createChildNode(nodeInfo.getMark(), JSON.toJSONString(nodeInfo).getBytes());
+        if (zookeeperManager.createChildNode(nodeInfo.getMark(), JSON.toJSONString(nodeInfo).getBytes())) {
+            return zookeeperManager;
+        } else {
+            return null;
+        }
     }
 
     public static NodeInfo buildNode(int port) {

@@ -117,9 +117,9 @@ public class ZookeeperManager {
             logger.info("createChildNode->" + nodeName + "=" + new String(datas));
             return true;
         } catch (KeeperException e) {
-            logger.error("KeeperException", e);
+            logger.error("createChildNode.KeeperException", e);
         } catch (InterruptedException ex) {
-            logger.error("InterruptedException", ex);
+            logger.error("createChildNode.InterruptedException", ex);
         }
         return false;
     }
@@ -142,9 +142,9 @@ public class ZookeeperManager {
                 }
             }
         } catch (KeeperException e) {
-            logger.error("KeeperException", e);
+            logger.error("checkRootNode.KeeperException", e);
         } catch (InterruptedException e) {
-            logger.error("InterruptedException", e);
+            logger.error("checkRootNode.InterruptedException", e);
         }
     }
 
@@ -158,6 +158,10 @@ public class ZookeeperManager {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private boolean isConnect() {
+        return zookeeper.getState() == ZooKeeper.States.CONNECTED;
     }
 
     public void stop() {

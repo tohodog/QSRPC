@@ -11,7 +11,9 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class NodeInfo {
 
+    @JSONField(serialize = false)
     private String zkIps;// zookeeper 主机
+    @JSONField(serialize = false)
     private String zkPath;// zookeeper 数据路径
 
     private String action;// 服务器处理功能支持多个,如 user,order
@@ -21,7 +23,6 @@ public class NodeInfo {
 
     private int coreThread = Runtime.getRuntime().availableProcessors();
     private int weight = 1;
-    private boolean backup;
     private boolean ssl;
 
     public String getZkIps() {
@@ -85,14 +86,6 @@ public class NodeInfo {
         mark = null;
     }
 
-    public boolean isBackup() {
-        return backup;
-    }
-
-    public void setBackup(boolean backup) {
-        this.backup = backup;
-    }
-
     public boolean isSsl() {
         return ssl;
     }
@@ -107,9 +100,9 @@ public class NodeInfo {
      *
      * @return IP + ":" + port
      */
+    @JSONField(serialize = false)
     private String mark;
 
-    @JSONField(serialize = false)
     public String getMark() {
         return mark != null ? mark : (mark = ip + ":" + port + "_" + action + "_" + weight + "_" + coreThread);
     }
