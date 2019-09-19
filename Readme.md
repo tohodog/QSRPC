@@ -26,7 +26,7 @@
 ``` 
 
 ## Demo
-####JAVA
+###JAVA
 ```
     //open node server 1
     NodeInfo nodeInfo = NodeRegistry.buildNode(8848);
@@ -85,7 +85,7 @@
     System.out.println("send [order] Done");
 
 ```
-####application.properties
+###application.properties
 ```
 qsrpc.zk.ips=127.0.0.1:2181
 qsrpc.zk.path=/qsrpc
