@@ -54,43 +54,40 @@ public class TestRPC extends TestCase {
 
     public static void main(String[] args) throws Exception {
 
-        //开启两个节点服务器
+        //open node server 1
         NodeInfo nodeInfo = NodeRegistry.buildNode(8848);
-        nodeInfo.setAction("user,order");
-        nodeInfo.setWeight(2);
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
-                return ("Hello! 8848 callback -" + JSON.parseObject(new String(message)).getString("m")).getBytes();
+                return ("Hello! node1 callback -" + new String(message)).getBytes();
             }
         });
 
-        NodeInfo nodeInfo2 = NodeRegistry.buildNode(8844);
-        nodeInfo2.setWeight(1);
+        //open node server 2
+        NodeInfo nodeInfo2 = new NodeInfo();
+        nodeInfo2.setZkIps("127.0.0.1:2181");
+        nodeInfo2.setZkPath("/qsrpc");
         nodeInfo2.setAction("order");
+        nodeInfo2.setIp("127.0.0.1");
+        nodeInfo2.setPort(8844);
+        nodeInfo2.setWeight(2);
+
         NodeLauncher.start(nodeInfo2, new MessageListener() {
             @Override
             public byte[] onMessage(final Async async, final byte[] message) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        async.callBack(("Hello! 8844 callback -" + JSON.parseObject(new String(message)).getString("m")).getBytes());
+                        async.callBack(("Hello! node2 callback -" + new String(message)).getBytes());
                     }
                 }).start();
                 return null;
             }
         });
 
-        //发送消息（转发http）
-        JSONObject jsonRequest = new JSONObject();
-        jsonRequest.put("i", "192.168.1.1");
-        jsonRequest.put("m", "POST");
-        jsonRequest.put("u", "/helloworld/666");
-        jsonRequest.put("h", null);
-        jsonRequest.put("b", "userid=1&tn=baidu&wd=%E4%B9%96%E4%B9%96%E4%B9%96".getBytes());
-
+        //sync
         for (int i = 0; i < 9; i++) {
-            RPCClientManager.getInstance().sendAsync("user", jsonRequest.toJSONString().getBytes(),
+            RPCClientManager.getInstance().sendAsync("user", "user".getBytes(),
                     new Callback<byte[]>() {
                         @Override
                         public void handleResult(byte[] result) {
@@ -105,12 +102,10 @@ public class TestRPC extends TestCase {
         }
         System.out.println("send [user] Done");
 
-        jsonRequest.put("m", "GET");
-
+        //async
         for (int i = 0; i < 9; i++) {
             Thread.sleep(1000);
-
-            byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", jsonRequest.toJSONString().getBytes());
+            byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", "order".getBytes());
             System.out.println("send [order] Result: " + new String(msg_cb));
         }
         System.out.println("send [order] Done");
