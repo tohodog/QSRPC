@@ -105,7 +105,7 @@ qsrpc.node.weight=1
   * 有问题请Add [issues](https://github.com/tohodog/QSRPC/issues)
   * 如果项目对你有帮助的话欢迎[![star][starsvg]][star]
   
-[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/source/logo.png
+[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
 [netty]: https://github.com/netty/netty
