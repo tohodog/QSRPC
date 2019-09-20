@@ -33,6 +33,19 @@
 ## Demo
 First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
 
+### application.properties
+```
+#zookeeper
+qsrpc.zk.ips=127.0.0.1:2181
+qsrpc.zk.path=/qsrpc
+
+#node server
+qsrpc.node.ip=127.0.0.1
+qsrpc.node.port=19980
+qsrpc.node.action=user,order
+qsrpc.node.weight=1
+```
+
 ### Node
 ```
     
@@ -69,20 +82,11 @@ First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
         }
     });
 ```
-### application.properties
-```
-qsrpc.zk.ips=127.0.0.1:2181
-qsrpc.zk.path=/qsrpc
-
-qsrpc.node.ip=127.0.0.1
-qsrpc.node.port=19980
-qsrpc.node.action=user,order
-qsrpc.node.weight=1
-```
 ### Client
 ```
     //async
     for (int i = 0; i < 9; i++) {
+    	//Send byte[] based on action
         RPCClientManager.getInstance().sendAsync("user", "user".getBytes(),
             new Callback<byte[]>() {
             @Override
