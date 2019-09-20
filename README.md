@@ -132,7 +132,7 @@ qsrpc.node.weight=1
 [zk]: https://github.com/apache/zookeeper
 
 [licensesvg]: https://img.shields.io/badge/License-Apache--2.0-red.svg
-[license]: https://github.com/tohodog/QSRPC/blob/master/LICENSE
+[license]: https://github.com/tohodog/QSVideoPlayer/blob/master/LICENSE
 
 [starsvg]: https://img.shields.io/github/stars/tohodog/QSRPC.svg?style=social&label=Stars
 [star]: https://github.com/tohodog/QSRPC
