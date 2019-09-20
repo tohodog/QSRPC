@@ -55,7 +55,7 @@ public class TestRPC extends TestCase {
     public static void main(String[] args) throws Exception {
 
         //open node server 1
-        NodeInfo nodeInfo = NodeRegistry.buildNode(8848);
+        NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
@@ -69,7 +69,7 @@ public class TestRPC extends TestCase {
         nodeInfo2.setZkPath("/qsrpc");
         nodeInfo2.setAction("order");
         nodeInfo2.setIp("127.0.0.1");
-        nodeInfo2.setPort(8844);
+        nodeInfo2.setPort(8848);
         nodeInfo2.setWeight(2);
 
         NodeLauncher.start(nodeInfo2, new MessageListener() {
@@ -85,7 +85,7 @@ public class TestRPC extends TestCase {
             }
         });
 
-        //sync
+        //async
         for (int i = 0; i < 9; i++) {
             RPCClientManager.getInstance().sendAsync("user", "user".getBytes(),
                     new Callback<byte[]>() {
@@ -102,7 +102,7 @@ public class TestRPC extends TestCase {
         }
         System.out.println("send [user] Done");
 
-        //async
+        //sync
         for (int i = 0; i < 9; i++) {
             Thread.sleep(1000);
             byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", "order".getBytes());
@@ -110,7 +110,5 @@ public class TestRPC extends TestCase {
         }
         System.out.println("send [order] Done");
 
-
     }
-
 }

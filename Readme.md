@@ -26,10 +26,11 @@
 ``` 
 
 ## Demo
-###JAVA
+###Node
 ```
     //open node server 1
-    NodeInfo nodeInfo = NodeRegistry.buildNode(8848);
+    NodeInfo nodeInfo = NodeRegistry.buildNode();read application.properties
+    //sync callback
     NodeLauncher.start(nodeInfo, new MessageListener() {
         @Override
         public byte[] onMessage(Async async, byte[] message) {
@@ -43,9 +44,10 @@
     nodeInfo2.setZkPath("/qsrpc");
     nodeInfo2.setAction("order");
     nodeInfo2.setIp("127.0.0.1");
-    nodeInfo2.setPort(8844);
+    nodeInfo2.setPort(8848);
     nodeInfo2.setWeight(2);
 
+    //async callback
     NodeLauncher.start(nodeInfo2, new MessageListener() {
         @Override
         public byte[] onMessage(final Async async, final byte[] message) {
@@ -58,8 +60,10 @@
         return null;
         }
     });
-
-    //sync
+```
+###Client
+```
+    //async
     for (int i = 0; i < 9; i++) {
         RPCClientManager.getInstance().sendAsync("user", "user".getBytes(),
             new Callback<byte[]>() {
@@ -76,7 +80,7 @@
     }
     System.out.println("send [user] Done");
 
-    //async
+    //sync
     for (int i = 0; i < 9; i++) {
         Thread.sleep(1000);
         byte[] msg_cb = RPCClientManager.getInstance().sendSync("order", "order".getBytes());
