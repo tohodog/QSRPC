@@ -6,7 +6,10 @@
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
-  * 基于netty,zookeeper开发的RPC框架,NIO设计
+  * 使用zookeeper服务发现
+  * 使用长连接TCP池,netty作为网络IO,支持全双工通信
+  * 消息发送支持异步/同步,NIO
+  * 自动选择符合action节点服务器,支持权重分发消息
   * 欢迎学习交流~
 
 ![ad][adpng]
@@ -31,7 +34,7 @@
 ### Node
 ```
     //open node server 1
-    NodeInfo nodeInfo = NodeRegistry.buildNode();read application.properties
+    NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
     //sync callback
     NodeLauncher.start(nodeInfo, new MessageListener() {
         @Override
