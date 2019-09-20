@@ -112,7 +112,7 @@ qsrpc.node.weight=1
   * 如果项目对你有帮助的话欢迎[![star][starsvg]][star]
   
 [logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
-[adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.png
+[adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.jpg
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
 [netty]: https://github.com/netty/netty
