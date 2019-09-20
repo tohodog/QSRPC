@@ -31,8 +31,11 @@
 ``` 
 
 ## Demo
+First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
+
 ### Node
 ```
+    
     //open node server 1
     NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
     //sync callback
@@ -45,12 +48,12 @@
 
     //open node server 2
     NodeInfo nodeInfo2 = new NodeInfo();
-    nodeInfo2.setZkIps("127.0.0.1:2181");
-    nodeInfo2.setZkPath("/qsrpc");
-    nodeInfo2.setAction("order");
-    nodeInfo2.setIp("127.0.0.1");
-    nodeInfo2.setPort(8848);
-    nodeInfo2.setWeight(2);
+    nodeInfo2.setZkIps("127.0.0.1:2181");//zookeeper ip
+    nodeInfo2.setZkPath("/qsrpc");//zookeeper path
+    nodeInfo2.setAction("order");//node server action
+    nodeInfo2.setIp("127.0.0.1");//node server ip
+    nodeInfo2.setPort(8848);//nodeserver port
+    nodeInfo2.setWeight(2);//request weight
 
     //async callback
     NodeLauncher.start(nodeInfo2, new MessageListener() {
@@ -65,6 +68,16 @@
         return null;
         }
     });
+```
+### application.properties
+```
+qsrpc.zk.ips=127.0.0.1:2181
+qsrpc.zk.path=/qsrpc
+
+qsrpc.node.ip=127.0.0.1
+qsrpc.node.port=19980
+qsrpc.node.action=user,order
+qsrpc.node.weight=1
 ```
 ### Client
 ```
@@ -94,16 +107,7 @@
     System.out.println("send [order] Done");
 
 ```
-### application.properties
-```
-qsrpc.zk.ips=127.0.0.1:2181
-qsrpc.zk.path=/qsrpc
 
-qsrpc.node.ip=127.0.0.1
-qsrpc.node.port=19980
-qsrpc.node.action=user,order
-qsrpc.node.weight=1
-```
  
 
 ## Log
