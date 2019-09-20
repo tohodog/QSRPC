@@ -7,7 +7,7 @@
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk] [![License][licensesvg]][license]
 
   * 基于netty,zookeeper开发的RPC框架,NIO设计
-
+  * 欢迎学习交流~
 
 ## Maven
 ```
@@ -26,7 +26,7 @@
 ``` 
 
 ## Demo
-###Node
+### Node
 ```
     //open node server 1
     NodeInfo nodeInfo = NodeRegistry.buildNode();read application.properties
@@ -61,7 +61,7 @@
         }
     });
 ```
-###Client
+### Client
 ```
     //async
     for (int i = 0; i < 9; i++) {
@@ -89,7 +89,7 @@
     System.out.println("send [order] Done");
 
 ```
-###application.properties
+### application.properties
 ```
 qsrpc.zk.ips=127.0.0.1:2181
 qsrpc.zk.path=/qsrpc
@@ -109,7 +109,7 @@ qsrpc.node.weight=1
   * 有问题请Add [issues](https://github.com/tohodog/QSRPC/issues)
   * 如果项目对你有帮助的话欢迎[![star][starsvg]][star]
   
-[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/source/logo.png
+[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
 [netty]: https://github.com/netty/netty
