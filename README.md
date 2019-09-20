@@ -6,7 +6,10 @@
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
-  * 基于netty,zookeeper开发的RPC框架,NIO设计
+  * 使用zookeeper服务发现
+  * 使用长连接TCP池,netty作为网络IO,支持全双工通信
+  * 消息发送支持异步/同步,NIO
+  * 自动选择符合action节点服务器,支持权重分发消息
   * 欢迎学习交流~
 
 ![ad][adpng]
@@ -28,10 +31,26 @@
 ``` 
 
 ## Demo
+First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
+
+### application.properties
+```
+#zookeeper
+qsrpc.zk.ips=127.0.0.1:2181
+qsrpc.zk.path=/qsrpc
+
+#node server
+qsrpc.node.ip=127.0.0.1
+qsrpc.node.port=19980
+qsrpc.node.action=user,order
+qsrpc.node.weight=1
+```
+
 ### Node
 ```
+    
     //open node server 1
-    NodeInfo nodeInfo = NodeRegistry.buildNode();read application.properties
+    NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
     //sync callback
     NodeLauncher.start(nodeInfo, new MessageListener() {
         @Override
@@ -42,12 +61,12 @@
 
     //open node server 2
     NodeInfo nodeInfo2 = new NodeInfo();
-    nodeInfo2.setZkIps("127.0.0.1:2181");
-    nodeInfo2.setZkPath("/qsrpc");
-    nodeInfo2.setAction("order");
-    nodeInfo2.setIp("127.0.0.1");
-    nodeInfo2.setPort(8848);
-    nodeInfo2.setWeight(2);
+    nodeInfo2.setZkIps("127.0.0.1:2181");//zookeeper ip
+    nodeInfo2.setZkPath("/qsrpc");//zookeeper path
+    nodeInfo2.setAction("order");//node server action
+    nodeInfo2.setIp("127.0.0.1");//node server ip
+    nodeInfo2.setPort(8848);//nodeserver port
+    nodeInfo2.setWeight(2);//request weight
 
     //async callback
     NodeLauncher.start(nodeInfo2, new MessageListener() {
@@ -67,6 +86,7 @@
 ```
     //async
     for (int i = 0; i < 9; i++) {
+    	//Send byte[] based on action
         RPCClientManager.getInstance().sendAsync("user", "user".getBytes(),
             new Callback<byte[]>() {
             @Override
@@ -91,16 +111,7 @@
     System.out.println("send [order] Done");
 
 ```
-### application.properties
-```
-qsrpc.zk.ips=127.0.0.1:2181
-qsrpc.zk.path=/qsrpc
 
-qsrpc.node.ip=127.0.0.1
-qsrpc.node.port=19980
-qsrpc.node.action=user,order
-qsrpc.node.weight=1
-```
  
 
 ## Log
