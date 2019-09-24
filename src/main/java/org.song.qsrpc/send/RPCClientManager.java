@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
 import org.song.qsrpc.RPCException;
 import org.song.qsrpc.ServerConfig;
+import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientPool;
 
@@ -112,6 +113,22 @@ public class RPCClientManager {
             logger.error("can no choose pool:" + action);
             throw new RPCException("can no choose pool:" + action);
         }
+    }
+
+    /**
+     * 异步回调,nio
+     */
+    public CallFuture<byte[]> sendAsync(String action, byte[] content) {
+        return sendAsync(action, content, ReadTimeout);
+    }
+
+    /**
+     * 异步回调,nio
+     */
+    public CallFuture<byte[]> sendAsync(String action, byte[] content, int timeout) {
+        CallFuture<byte[]> callback = CallFuture.<byte[]>newInstance();
+        sendAsync(action, content, callback, timeout);
+        return callback;
     }
 
     /**

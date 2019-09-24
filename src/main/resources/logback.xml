@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-
 	<appender name="STDOUT"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -102,26 +101,6 @@
 	</appender>
 
 
-	<appender name="FILE_BIZ"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<filter class="ch.qos.logback.classic.filter.LevelFilter">
-			<level>WARN</level>
-			<onMatch>ACCEPT</onMatch>
-			<onMismatch>DENY</onMismatch>
-		</filter>
-		<File>./logs/biz.log</File>
-		<rollingPolicy
-			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<FileNamePattern>./logs/biz-%d{yyyy-MM-dd}.log</FileNamePattern>
-			<maxHistory>90</maxHistory>
-		</rollingPolicy>
-		<encoder>
-			<pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{80} -%msg%n</pattern>
-			<charset>UTF-8</charset>
-		</encoder>
-	</appender>
-
-
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
 		<!-- <appender-ref ref="FILE_ALL" /> -->
@@ -134,9 +113,5 @@
 	<logger name="org.apache.zookeeper" level="INFO" />
 	<logger name="com.zaxxer.hikari" level="ERROR" />
 	<logger name="io.netty" level="INFO" />
-
-	<logger name="org.song.qserver.logic.util" level="INFO" additivity="false">
-		<appender-ref ref="FILE_BIZ" />
-	</logger>
 
 </configuration>

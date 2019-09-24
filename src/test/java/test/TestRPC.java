@@ -11,6 +11,7 @@ import org.song.qsrpc.receiver.NodeLauncher;
 import org.song.qsrpc.receiver.NodeRegistry;
 import org.song.qsrpc.receiver.TCPNodeServer;
 import org.song.qsrpc.send.RPCClientManager;
+import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.zk.NodeInfo;
 
@@ -109,6 +110,10 @@ public class TestRPC extends TestCase {
             System.out.println("send [order] Result: " + new String(msg_cb));
         }
         System.out.println("send [order] Done");
+
+        //future
+        CallFuture<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
+        System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 
     }
 }
