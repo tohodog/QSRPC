@@ -26,7 +26,7 @@
 	<dependency>
 	    <groupId>com.github.tohodog</groupId>
 	    <artifactId>QSRPC</artifactId>
-	    <version>1.0.1</version>
+	    <version>1.0.2</version>
 	</dependency>
 ``` 
 
@@ -117,7 +117,7 @@ qsrpc.node.weight=1
  
 
 ## Log
-### v1.0.1(2019-09-26)
+### v1.0.2(2019-09-26)
   * Support future get
   * Optimization
 ### v1.0.0(2019-09-19)
