@@ -7,13 +7,13 @@
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
   * 使用zookeeper服务发现
-  * 使用长连接TCP池,netty作为网络IO,支持全双工通信
+  * 使用长连接TCP池,netty作为网络IO,支持全双工通信,高性能
   * 消息发送支持异步/同步,NIO
   * 自动选择符合action节点服务器,支持权重分发消息
+  * 可进行二次封装开发,远程调用(计划中),消息路由负载均衡等等
   * 欢迎学习交流~
 
 ![ad][adpng]
-
 ## Maven
 ```
 	<repositories>
