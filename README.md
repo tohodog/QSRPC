@@ -48,7 +48,6 @@ qsrpc.node.weight=1
 
 ### Node
 ```
-    
     //open node server 1
     NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
     //sync callback
@@ -110,11 +109,17 @@ qsrpc.node.weight=1
     }
     System.out.println("send [order] Done");
 
+    //future
+    CallFuture<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
+    System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
 
  
 
 ## Log
+### v1.0.1(2019-09-26)
+  * Support future get
+  * Optimization
 ### v1.0.0(2019-09-19)
   * Open sourse
 
