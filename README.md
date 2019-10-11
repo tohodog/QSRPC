@@ -2,6 +2,7 @@
 <br/>
 <br/>
 ---
+一个基于zookeeper服务发现、netty长连接池的高性能远程调用RPC框架
 <br/>
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
