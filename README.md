@@ -125,8 +125,8 @@ qsrpc.node.weight=1
   * Open sourse
 
 ## Other
-  * 有问题请Add [issues](https://github.com/tohodog/QSRPC/issues)
-  * 如果项目对你有帮助的话欢迎[![star][starsvg]][star]
+  * 有问题请Add [issues](https://gitee.com/sakaue/QSRPC/issues)
+  * 如果项目对你有帮助的话欢迎star
   
 [logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
 [adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.jpg
