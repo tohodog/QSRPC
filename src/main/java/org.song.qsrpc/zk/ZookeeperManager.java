@@ -60,7 +60,7 @@ public class ZookeeperManager {
             } else {
                 logger.error("zookeeper conenct server timeout");
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             logger.error("zookeeper conenct server failed", e);
         }
         return zk;
@@ -92,7 +92,7 @@ public class ZookeeperManager {
             watchNode.onNodeDataChange(data);
             // logger.info("Service discovery triggered updating connected server node, node
             // data: {}", dataList);
-        } catch (KeeperException | InterruptedException e) {
+        } catch (Exception e) {
             logger.error("Service discovery failed", e);
         }
     }
@@ -118,8 +118,8 @@ public class ZookeeperManager {
             return true;
         } catch (KeeperException e) {
             logger.error("createChildNode.KeeperException", e);
-        } catch (InterruptedException ex) {
-            logger.error("createChildNode.InterruptedException", ex);
+        } catch (Exception ex) {
+            logger.error("createChildNode.Exception", ex);
         }
         return false;
     }
@@ -143,8 +143,8 @@ public class ZookeeperManager {
             }
         } catch (KeeperException e) {
             logger.error("checkRootNode.KeeperException", e);
-        } catch (InterruptedException e) {
-            logger.error("checkRootNode.InterruptedException", e);
+        } catch (Exception e) {
+            logger.error("checkRootNode.Exception", e);
         }
     }
 

@@ -20,13 +20,13 @@ public class RPCClientManager {
 
     private static final Logger logger = LoggerFactory.getLogger(RPCClientManager.class);
 
-    public static final int ReadTimeout;
+    public static final int RpcTimeout;
 
     static {
         if (ServerConfig.containsKey(ServerConfig.KEY_RPC_CONNECT_TIMEOUT)) {
-            ReadTimeout = ServerConfig.getInt(ServerConfig.KEY_RPC_CONNECT_TIMEOUT);
+            RpcTimeout = ServerConfig.getInt(ServerConfig.KEY_RPC_CONNECT_TIMEOUT);
         } else {
-            ReadTimeout = 18 * 1000;
+            RpcTimeout = 60 * 1000;
         }
     }
 
@@ -68,13 +68,13 @@ public class RPCClientManager {
      * <p>
      * 访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好,
      * <p>
-     * 作为主请求路由RPC强烈不建议用
+     * 如作为主请求路由RPC强烈不建议用
      *
      * @throws InterruptedException
      * @throws RPCException
      */
     public byte[] sendSync(String action, byte[] content) throws RPCException, InterruptedException {
-        return sendSync(action, content, ReadTimeout);
+        return sendSync(action, content, RpcTimeout);
     }
 
     /**
@@ -88,42 +88,44 @@ public class RPCClientManager {
      * @throws RPCException
      */
     public byte[] sendSync(String action, byte[] content, int timeout) throws RPCException, InterruptedException {
-        ClientPool clientPool = nodePoolManager.chooseClientPool(action);
-        if (clientPool != null) {
-            TCPRouteClient tcpClient = clientPool.getResource();
-            if (tcpClient != null) {
-                try {
-                    Message request = new Message();
-                    request.setId(Message.createID());
-                    request.setContent(content);
-                    if (POOL_NIO) {
-                        clientPool.returnResource(tcpClient);
-                    }
-                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
-                    return tcpClient.sendSync(request, timeout).getContent();
-                } finally {
-                    if (!POOL_NIO) {
-                        clientPool.returnResource(tcpClient);
-                    }
-                }
-            } else {
-                throw new RPCException("can get client from pool:" + action + "," + clientPool);
-            }
-        } else {
-            logger.error("can no choose pool:" + action);
-            throw new RPCException("can no choose pool:" + action);
-        }
+        CallFuture<byte[]> callFuture = sendAsync(action, content, timeout);
+        return callFuture.get();
+//        ClientPool clientPool = nodePoolManager.chooseClientPool(action);
+//        if (clientPool != null) {
+//            TCPRouteClient tcpClient = clientPool.getResource();
+//            if (tcpClient != null) {
+//                try {
+//                    Message request = new Message();
+//                    request.setId(Message.createID());
+//                    request.setContent(content);
+//                    if (POOL_NIO) {
+//                        clientPool.returnResource(tcpClient);
+//                    }
+//                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
+//                    return tcpClient.sendSync(request, timeout).getContent();
+//                } finally {
+//                    if (!POOL_NIO) {
+//                        clientPool.returnResource(tcpClient);
+//                    }
+//                }
+//            } else {
+//                throw new RPCException("can get client from pool:" + action + "," + clientPool);
+//            }
+//        } else {
+//            logger.error("can no choose pool:" + action);
+//            throw new RPCException("can no choose pool:" + action);
+//        }
     }
 
     /**
-     * 异步回调,nio
+     * 异步Future,nio
      */
     public CallFuture<byte[]> sendAsync(String action, byte[] content) {
-        return sendAsync(action, content, ReadTimeout);
+        return sendAsync(action, content, RpcTimeout);
     }
 
     /**
-     * 异步回调,nio
+     * 异步Future,nio
      */
     public CallFuture<byte[]> sendAsync(String action, byte[] content, int timeout) {
         CallFuture<byte[]> callback = CallFuture.<byte[]>newInstance();
@@ -135,7 +137,7 @@ public class RPCClientManager {
      * 异步回调,nio
      */
     public boolean sendAsync(String action, byte[] content, Callback<byte[]> callback) {
-        return sendAsync(action, content, callback, ReadTimeout);
+        return sendAsync(action, content, callback, RpcTimeout);
     }
 
     /**

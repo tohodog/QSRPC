@@ -4,73 +4,81 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- *
  * @author song
- *
  * @Email vipqinsong@gmail.com
- *
  * @date 2019年3月1日 下午12:30:10
- *
- *       rpc消息
- *
+ * <p>
+ * rpc消息
  */
 public class Message {
 
-	private static int ID;
+    public final static int VER = 0;
 
-	private int id;
+    private int id;
 
-	private byte type;// 内容类型,预留(比如0全包信息 1分包信息 2分包结束)
+    private byte ver = VER;// 协议版本目前只有0,这个不能手动设置,跟着代码走
 
-	private byte[] content;
+    private byte zip;// 压缩类型: 0不压缩 1snappy 2gzip
 
-	public int getId() {
-		return id;
-	}
+    private byte[] content;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public byte getType() {
-		return type;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setType(byte type) {
-		this.type = type;
-	}
+    public byte getVer() {
+        return ver;
+    }
 
-	public byte[] getContent() {
-		return content;
-	}
+    public void setVer(byte ver) {
+        this.ver = ver;
+    }
 
-	public void setContent(byte[] content) {
-		this.content = content;
-	}
+    public byte getZip() {
+        return zip;
+    }
 
-	public String getString() {
-		if (content == null)
-			return null;
-		return new String(content);
-	}
+    public void setZip(byte zip) {
+        this.zip = zip;
+    }
 
-	public void setString(String s) {
-		if (s != null)
-			this.content = s.getBytes();
-	}
+    public byte[] getContent() {
+        return content;
+    }
 
-	public JSONObject getJSONObject() {
-		if (content == null)
-			return null;
-		return JSON.parseObject(getString());
-	}
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
 
-	public void setJSONObject(JSONObject json) {
-		if (json != null)
-			setString(json.toJSONString());
-	}
+    public String getString() {
+        if (content == null)
+            return null;
+        return new String(content);
+    }
 
-	public static synchronized int createID() {
-		return ++ID;
-	}
+    public void setString(String s) {
+        if (s != null)
+            this.content = s.getBytes();
+    }
+
+    public JSONObject getJSONObject() {
+        if (content == null)
+            return null;
+        return JSON.parseObject(getString());
+    }
+
+    public void setJSONObject(JSONObject json) {
+        if (json != null)
+            setString(json.toJSONString());
+    }
+
+    private static int ID;
+
+    public static synchronized int createID() {
+        return ++ID;
+    }
 }

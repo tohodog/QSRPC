@@ -15,6 +15,7 @@ import org.song.qsrpc.RPCException;
 import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
+import org.song.qsrpc.zip.Zip;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +35,7 @@ public class TCPRouteClient {
 
     private static final boolean soReuseaddr = true;
 
-    private static final boolean tcpNodelay = true;
+    private static final boolean tcpNodelay = false;
 
     private static final int soRcvbuf = 1024 * 128;
 
@@ -42,6 +43,7 @@ public class TCPRouteClient {
 
     private String ip;
     private int port;
+    private byte zip;
 
     private SslContext sslContext;
 
@@ -54,8 +56,13 @@ public class TCPRouteClient {
     // Lock lock=new ReentrantLock();
 
     public TCPRouteClient(String ip, int port) {
+        this(ip, port, null);
+    }
+
+    public TCPRouteClient(String ip, int port, String zip) {
         this.ip = ip;
         this.port = port;
+        this.zip = Zip.getInt(zip);
     }
 
     public void setSslContext(SslContext sslContext) {
@@ -66,7 +73,7 @@ public class TCPRouteClient {
         if (isConnect())
             return;
         try {
-            bossGroup = new NioEventLoopGroup(1);//
+            bossGroup = new NioEventLoopGroup(zip == 0 ? 1 : Runtime.getRuntime().availableProcessors());//有压缩增加线程数
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connTimeout);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, soKeepalive);
@@ -145,6 +152,8 @@ public class TCPRouteClient {
      */
     public void sendAsync(Message request, Callback<Message> callback, int timeout) {
         if (isConnect()) {
+            request.setZip(zip);
+
             CallbackPool.put(request.getId(), callback, timeout);
             channel.writeAndFlush(request);
         } else {
@@ -154,10 +163,12 @@ public class TCPRouteClient {
     }
 
     /**
-     * 同步,返回响应信息 RPC不建议用,访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好
+     * 同步,返回响应信息 路由不建议用,访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好
      */
     public Message sendSync(Message request, int timeout) throws InterruptedException, RPCException {
         if (isConnect()) {
+            request.setZip(zip);
+
             CallFuture<Message> future = CallFuture.newInstance();
             CallbackPool.put(request.getId(), future);
             channel.writeAndFlush(request);

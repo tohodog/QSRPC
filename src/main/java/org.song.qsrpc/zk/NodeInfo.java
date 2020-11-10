@@ -16,12 +16,14 @@ public class NodeInfo {
     @JSONField(serialize = false)
     private String zkPath;// zookeeper 数据路径
 
-    private String action;// 服务器处理功能支持多个,如 user,order
+    private String[] actions;// 服务器处理功能支持多个,如 user,order
 
     private String ip;// 内网ip/外网IP
     private int port;
 
-    private int coreThread = Runtime.getRuntime().availableProcessors();
+    private String zip;// 压缩 snappy gzip
+
+    private int coreThread = Runtime.getRuntime().availableProcessors();//这个决定链接的tcp数量
     private int weight = 1;
     private boolean ssl;
 
@@ -41,13 +43,18 @@ public class NodeInfo {
         this.zkPath = zkPath;
     }
 
-    public String getAction() {
-        return action;
+
+    public String[] getActions() {
+        return actions;
     }
 
+    public void setActions(String[] actions) {
+        this.actions = actions;
+    }
+
+    @JSONField(serialize = false)
     public void setAction(String action) {
-        this.action = action;
-        mark = null;
+        this.actions = action.split(",");
     }
 
     public String getIp() {
@@ -66,6 +73,14 @@ public class NodeInfo {
     public void setPort(int port) {
         this.port = port;
         mark = null;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
     }
 
     public int getCoreThread() {
@@ -94,24 +109,34 @@ public class NodeInfo {
         this.ssl = ssl;
     }
 
+    private long time = System.currentTimeMillis();
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
     /**
      * 节点唯一标识
-     * 加入后面的配置区分改配置重启节点重复问题
+     * 加入后面的time区分改配置重启节点重复问题
      *
      * @return IP + ":" + port
      */
     @JSONField(serialize = false)
-    private String mark;
+    private transient String mark;
 
-    public String getMark() {
-        return mark != null ? mark : (mark = ip + ":" + port + "_" + action + "_" + weight + "_" + coreThread);
+    public String id() {
+        return mark != null ? mark : (mark = ip + ":" + port + "_" + time);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof NodeInfo) {
             NodeInfo o1 = (NodeInfo) o;
-            return this.getMark().equals(o1.getMark());
+            return this.id().equals(o1.id());
         }
         return false;
     }

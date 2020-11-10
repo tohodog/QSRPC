@@ -17,7 +17,7 @@ public class NodeRegistry {
 
     public static ZookeeperManager registry(NodeInfo nodeInfo) {
         ZookeeperManager zookeeperManager = new ZookeeperManager(nodeInfo.getZkIps(), nodeInfo.getZkPath());
-        if (zookeeperManager.createChildNode(nodeInfo.getMark(), JSON.toJSONString(nodeInfo).getBytes())) {
+        if (zookeeperManager.createChildNode(nodeInfo.id(), JSON.toJSONString(nodeInfo).getBytes())) {
             return zookeeperManager;
         } else {
             return null;
@@ -34,7 +34,7 @@ public class NodeRegistry {
         String weight = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_WEIGHT);
 
         NodeInfo nodeInfo = new NodeInfo();
-        nodeInfo.setAction(node_action);
+        nodeInfo.setActions(node_action.split(","));
         nodeInfo.setIp(node_ip);
         nodeInfo.setPort(port);
         if (weight != null) {

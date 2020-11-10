@@ -23,6 +23,7 @@ public class ServerConfig {
     public final static String KEY_RPC_NODE_PORT = "qsrpc.node.port";
     public final static String KEY_RPC_NODE_ACTION = "qsrpc.node.action";
     public final static String KEY_RPC_NODE_WEIGHT = "qsrpc.node.weight";
+    public final static String KEY_RPC_NODE_ZIP = "qsrpc.node.zip";
 
     public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
 
