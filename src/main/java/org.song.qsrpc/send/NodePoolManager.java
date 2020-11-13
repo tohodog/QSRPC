@@ -36,8 +36,9 @@ public class NodePoolManager {
     private Map<String, NoteRequestInfo> nodeReqInfoMap = new HashMap<>();// key:action
 
     public void initNodePool() {
-        String ips = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_IPS);
+        String ips = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
         String path = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
+        if (path == null) path = "/qsrpc";
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
             //监听节点信息
@@ -148,8 +149,8 @@ public class NodePoolManager {
 
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
         PoolConfig poolConfig = new PoolConfig();
-//        poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
-        ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()));
+        poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
+        ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
         return clientPool;
 
     }

@@ -16,10 +16,8 @@ import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * @author song
@@ -37,15 +35,13 @@ public class TestConcurrent {
             DEFAULT_THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
-    private final static int count = 12500;//
+    private final static int count = 125000;//
     private final static int thread = 8;//8个线程
     private final static long len = count * thread;//总共百万请求
 
 
     //加上包头包尾一个消息长度128字节
     private static byte[] req = new byte[116];
-    private static byte[] res = req;
-
 
     static {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
@@ -55,7 +51,12 @@ public class TestConcurrent {
         new TCPNodeServer(NodeRegistry.buildNode(), new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
-                return res;
+//                try {
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                return message;
             }
         }).start();
 
@@ -63,60 +64,21 @@ public class TestConcurrent {
 
         for (int i = 0; i < thread; i++) {
 //            EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接,这个比较快,rpc框架考虑不使用连接池,通信只用一个tcp链接
-//            EXECUTOR_SERVICE.submit(asyncPOOL);//异步线程池
+            EXECUTOR_SERVICE.submit(asyncPOOL);//异步线程池
 
 //            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
-            EXECUTOR_SERVICE.submit(syncPOOL);//同步线程池
+//            EXECUTOR_SERVICE.submit(syncPOOL);//同步线程池
         }
         temp = System.currentTimeMillis();
 
     }
 
-    //异步
-    //use time:15594 ,qos:64127 ,流量:8015KB/s
-    static Runnable asyncSINGLE = new Runnable() {
-
-        @Override
-        public void run() {
-            // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
-            client.connect();
-            for (int i = 0; i < count; i++) {
-                Message msg = new Message();
-                msg.setId(Message.createID());
-                msg.setContent(req);
-                client.sendAsync(msg, callback, 10000);
-            }
-        }
-    };
-
-    //同步
-    static Runnable syncSINGLE = new Runnable() {
-
-        @Override
-        public void run() {
-            // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
-            client.connect();
-            for (int i = 0; i < count; i++) {
-                Message msg = new Message();
-                msg.setId(Message.createID());
-                msg.setContent(req);
-                try {
-                    System.out.println("sendAsync id-" + client.sendSync(msg, 10000).getId());
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
 
     //=================使用连接池=================
     static long temp = 0;
+    static Map<Integer, Long> map = new ConcurrentHashMap<>();
 
-    //异步
+    //异步POOL
     //use time:18666 ,qos:53573 ,流量:6696KB/s
     static Runnable asyncPOOL = new Runnable() {
         @Override
@@ -129,16 +91,21 @@ public class TestConcurrent {
         }
     };
 
+    //异步POOL回调
     static Callback<Message> callback = new Callback<Message>() {
+        long requse;
 
         @Override
         public void handleResult(Message res) {
+            requse += (System.currentTimeMillis() - map.get(res.getId()));
             if (res.getId() == len) {
                 System.out.println("callback id-" + res.getId());
                 long use = System.currentTimeMillis() - temp;
                 System.out.println("use time:" + use +
                         " ,qps:" + len * 1000 / use +
-                        " ,流量:" + len * (req.length + 12) / 1024 * 1000 / use + "KB/s");
+                        " ,流量:" + len * (res.getContent().length + 12) / 1024 * 1000 / use + "KB/s" +
+                        " ,平均请求延时:" + (requse / len)
+                );
             }
         }
 
@@ -150,7 +117,7 @@ public class TestConcurrent {
     };
 
 
-    //同步
+    //同步POOL
     static Runnable syncPOOL = new Runnable() {
 
         @Override
@@ -172,15 +139,17 @@ public class TestConcurrent {
     };
     // ==================test pool==================
 
-    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", PORT,"gzip"));//snappy
+    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", PORT, ""));//snappy
 
+    //同步
     static Message sendSyncTest(Message request) {
         TCPRouteClient tcpClient = clientPool.getResource();
         if (tcpClient != null) {
             try {
                 request.setId(Message.createID());
+                map.put(request.getId(), System.currentTimeMillis());
                 clientPool.returnResource(tcpClient);
-                return tcpClient.sendSync(request, 10_000);
+                return tcpClient.sendSync(request, 10_0000);
             } catch (RPCException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -190,13 +159,67 @@ public class TestConcurrent {
         return null;
     }
 
+    //异步
     static void sendAsyncTest(Message request, Callback<Message> callback) {
         TCPRouteClient tcpClient = clientPool.getResource();
         if (tcpClient != null) {
             request.setId(Message.createID());
-            tcpClient.sendAsync(request, callback, 10_000);
+            map.put(request.getId(), System.currentTimeMillis());
+            tcpClient.sendAsync(request, callback, 10_0000);
             clientPool.returnResource(tcpClient);
         }
     }
+
+
+    // ==================test single==================
+
+    //异步
+    //use time:15594 ,qos:64127 ,流量:8015KB/s
+    static Runnable asyncSINGLE = new Runnable() {
+
+        @Override
+        public void run() {
+            // tcp长连接
+            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
+            client.connect();
+            for (int i = 0; i < count; i++) {
+                Message msg = new Message();
+                msg.setId(Message.createID());
+                map.put(msg.getId(), System.currentTimeMillis());
+                msg.setContent(req);
+                client.sendAsync(msg, callback, 100000);
+            }
+        }
+    };
+
+    //同步
+    static Runnable syncSINGLE = new Runnable() {
+
+        @Override
+        public void run() {
+            // tcp长连接
+            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
+            client.connect();
+            for (int i = 0; i < count; i++) {
+                Message msg = new Message();
+                msg.setId(Message.createID());
+                msg.setContent(req);
+                map.put(msg.getId(), System.currentTimeMillis());
+                try {
+                    Message res = client.sendSync(msg, 100000);
+                    if (res.getId() == len) {
+                        System.out.println("callback id-" + res.getId());
+                        long use = System.currentTimeMillis() - temp;
+                        System.out.println("use time:" + use +
+                                " ,qps:" + len * 1000 / use +
+                                " ,流量:" + len * (req.length + 12) / 1024 * 1000 / use + "KB/s");
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
 }

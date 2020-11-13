@@ -153,7 +153,10 @@ public class TCPRouteClient {
     public void sendAsync(Message request, Callback<Message> callback, int timeout) {
         if (isConnect()) {
             request.setZip(zip);
-
+            if (timeout <= 0) {
+                callback.handleError(new RPCException(getClass().getName() + ".sendAsync() timeout must >0 :" + timeout));
+                return;
+            }
             CallbackPool.put(request.getId(), callback, timeout);
             channel.writeAndFlush(request);
         } else {
@@ -178,7 +181,7 @@ public class TCPRouteClient {
                 CallbackPool.remove(request.getId());
             }
         } else {
-            throw new RPCException("TCPClient.sendSync() can no connect:" + getInfo());
+            throw new RPCException(getClass().getName() + ".sendSync() can no connect:" + getInfo());
         }
     }
 

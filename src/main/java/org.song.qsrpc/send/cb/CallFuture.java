@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class CallFuture<T> implements Future<T>, Callback<T> {
 
-    private static final int MAX_WAIT = 60 * 1000;
+    private static final int MAX_WAIT = 60 * 60 * 1000;
 
     /**
      * 内部回调用的栅栏

@@ -12,8 +12,18 @@ import org.song.qsrpc.zk.NodeInfo;
  */
 public class ClientPool extends Pool<TCPRouteClient> {
 
+    private boolean queue;
+
     public ClientPool(PoolConfig poolConfig, ClientFactory factory) {
         super(poolConfig.getPoolConfig(), factory);
     }
 
+    public ClientPool(PoolConfig poolConfig, ClientFactory factory, boolean queue) {
+        super(poolConfig.getPoolConfig(), factory);
+        this.queue = queue;
+    }
+
+    public boolean isQueue() {
+        return queue;
+    }
 }

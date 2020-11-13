@@ -24,17 +24,19 @@ public class NodeRegistry {
         }
     }
 
-    public static NodeInfo buildNode(int port) {
-        String zkIps = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_IPS);
+    public static NodeInfo buildNode() {
+        String zkIps = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
         String zkPath = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
+        if (zkPath == null) zkPath = "/qsrpc";
 
-        String node_ip = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_IP);
-        if (node_ip == null) node_ip = AddressUtils.getInnetIp();
+        String node_ip = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_NODE_IP);
+        int port = Integer.parseInt(ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_NODE_PORT));
         String node_action = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ACTION);
         String weight = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_WEIGHT);
-
         NodeInfo nodeInfo = new NodeInfo();
-        nodeInfo.setActions(node_action.split(","));
+        if (node_action != null) {
+            nodeInfo.setActions(node_action.split(","));
+        }
         nodeInfo.setIp(node_ip);
         nodeInfo.setPort(port);
         if (weight != null) {
@@ -47,7 +49,4 @@ public class NodeRegistry {
         return nodeInfo;
     }
 
-    public static NodeInfo buildNode() {
-        return buildNode(ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT));
-    }
 }

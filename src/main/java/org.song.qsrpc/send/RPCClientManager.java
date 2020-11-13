@@ -9,6 +9,8 @@ import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientPool;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author song
  * @Email vipqinsong@gmail.com
@@ -77,19 +79,9 @@ public class RPCClientManager {
         return sendSync(action, content, RpcTimeout);
     }
 
-    /**
-     * 同步发送,阻塞,
-     * <p>
-     * 访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好,
-     * <p>
-     * 作为主请求路由RPC强烈不建议用
-     *
-     * @throws InterruptedException
-     * @throws RPCException
-     */
     public byte[] sendSync(String action, byte[] content, int timeout) throws RPCException, InterruptedException {
         CallFuture<byte[]> callFuture = sendAsync(action, content, timeout);
-        return callFuture.get();
+        return callFuture.get(timeout, TimeUnit.MILLISECONDS);
 //        ClientPool clientPool = nodePoolManager.chooseClientPool(action);
 //        if (clientPool != null) {
 //            TCPRouteClient tcpClient = clientPool.getResource();
@@ -98,15 +90,10 @@ public class RPCClientManager {
 //                    Message request = new Message();
 //                    request.setId(Message.createID());
 //                    request.setContent(content);
-//                    if (POOL_NIO) {
-//                        clientPool.returnResource(tcpClient);
-//                    }
 //                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
 //                    return tcpClient.sendSync(request, timeout).getContent();
 //                } finally {
-//                    if (!POOL_NIO) {
-//                        clientPool.returnResource(tcpClient);
-//                    }
+//                    clientPool.returnResource(tcpClient);
 //                }
 //            } else {
 //                throw new RPCException("can get client from pool:" + action + "," + clientPool);
@@ -153,10 +140,13 @@ public class RPCClientManager {
                 request.setContent(content);
 
                 tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient), timeout);
-                if (POOL_NIO) {
+                if (!clientPool.isQueue()) {
+                    // 大量请求时,如果这里释放资源,那么请求会全部打出去,堆积在服务端,
+                    // 不释放请求就堆积在getResource等待获取资源,都会延时,
+                    // 所以要有qps限制,1放在服务端拦截 2放在这里就设置getResource一秒超时,建议1,也就是
                     clientPool.returnResource(tcpClient);
                 }
-                logger.info("sendAsync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
+                logger.info("sendMessage:" + action + ", id:" + request.getId() + ", channel:" + tcpClient.getInfo());
             } else {
                 callback.handleError(new RPCException("can get client from pool:" + action + "," + clientPool));
             }
@@ -183,7 +173,7 @@ public class RPCClientManager {
 
         @Override
         public void handleResult(Message result) {
-            if (!POOL_NIO) {
+            if (clientPool.isQueue()) {
                 clientPool.returnResource(tcpClient);
             }
             tcpClient = null;
@@ -192,7 +182,7 @@ public class RPCClientManager {
 
         @Override
         public void handleError(Throwable error) {
-            if (!POOL_NIO) {
+            if (clientPool.isQueue()) {
                 clientPool.returnResource(tcpClient);
             }
             tcpClient = null;

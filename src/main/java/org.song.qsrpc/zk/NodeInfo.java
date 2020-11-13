@@ -22,6 +22,12 @@ public class NodeInfo {
     private int port;
 
     private String zip;// 压缩 snappy gzip
+    /**
+     * tcp连接通信模式:作为大量并发时的一个配置
+     * false:默认并发发送,可发送超过节点处理极限的qps,大量请求会堆积在服务提供者,默认这个,由服务者来限制qps
+     * true:排队,请求-响应,可作为限流降级,但是大量请求会堆积在请求者等待连接池获取,一样会超时
+     */
+    private boolean queue;
 
     private int coreThread = Runtime.getRuntime().availableProcessors();//这个决定链接的tcp数量
     private int weight = 1;
@@ -81,6 +87,14 @@ public class NodeInfo {
 
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    public boolean isQueue() {
+        return queue;
+    }
+
+    public void setQueue(boolean queue) {
+        this.queue = queue;
     }
 
     public int getCoreThread() {

@@ -65,6 +65,14 @@ public class ServerConfig {
         return value;
     }
 
+    // 服务器配置必须存在,否则运行异常,防止BUG
+    public static String getStringNotnull(String key) {
+        String value = properties.getProperty(key);
+        if (value == null)
+            throw new RuntimeException(key + " property value is null");
+        return value;
+    }
+
     public static boolean containsKey(String key) {
         return properties.containsKey(key);
     }

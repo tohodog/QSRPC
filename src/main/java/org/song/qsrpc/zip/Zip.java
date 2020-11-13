@@ -23,7 +23,6 @@ import java.util.zip.GZIPOutputStream;
  */
 public class Zip {
 
-    private static Map<String, IZip> map = new HashMap<>();
     private static List<IZip> list = new ArrayList<>();
 
     static {
@@ -58,7 +57,7 @@ public class Zip {
                 gzip.write(bytes);
                 gzip.close();
                 bytes = out.toByteArray();
-                System.out.println("压缩+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
+//                System.out.println("压缩+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
                 return bytes;
             }
 
@@ -74,22 +73,16 @@ public class Zip {
                     out.write(buffer, 0, n);
                 }
                 bytes = out.toByteArray();
-                System.out.println("解压+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
+//                System.out.println("解压+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
                 return bytes;
             }
         };
-
-        map.put("snappy", snappy);
-        map.put("gzip", gzip);
         list.add(snappy);
         list.add(gzip);
     }
 
     public static IZip get(String type) {
-        if (type == null || type.isEmpty()) return null;
-        IZip iZip = map.get(type.toLowerCase());
-        if (iZip == null) Log.w("zip type is null");
-        return iZip;
+        return get(getInt(type));
     }
 
     public static IZip get(int type) {
