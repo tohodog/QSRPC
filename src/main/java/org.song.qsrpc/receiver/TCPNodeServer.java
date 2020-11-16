@@ -52,8 +52,8 @@ public class TCPNodeServer {
             // 用于启用或关闭Nagle算法。如果要求高实时性，有数据发送时就马上发送，就将该选项设置为true关闭Nagle算法；如果要减少发送次数减少网络交互，就设置为false等累积一定大小后再发送。默认为false。
             b.option(ChannelOption.TCP_NODELAY, false);
             // 缓冲区大小
-            // b.option(ChannelOption.SO_RCVBUF, 128 * 1024);
-            // b.option(ChannelOption.SO_SNDBUF, 128 * 1024);
+            b.option(ChannelOption.SO_RCVBUF, 128 * 1024);
+            b.option(ChannelOption.SO_SNDBUF, 128 * 1024);
 
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     // .handler(new LoggingHandler(LogLevel.INFO)) //日记

@@ -29,7 +29,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-        logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
+//        logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
 
         Runnable work = new Runnable() {
 
@@ -63,8 +63,10 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
             }
         };
 
+        work.run();
         // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
-        workerGroup.execute(work);
+        //此操作会导致延迟变大!!,禁用
+//        workerGroup.execute(work);
     }
 
 

@@ -15,7 +15,7 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最大数量。 默认值是8，如果是负值表示没限制。 这个根据分布式服务器的cpu线程数 *2
      */
-    private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
+    private int maxIdle = Runtime.getRuntime().availableProcessors() * 2;
 
     /**
      * whenExhaustedAction如果是WHEN_EXHAUSTED_BLOCK，指定等待的毫秒数。<br/>

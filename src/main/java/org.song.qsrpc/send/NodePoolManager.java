@@ -149,6 +149,8 @@ public class NodePoolManager {
 
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
         PoolConfig poolConfig = new PoolConfig();
+        int coreThread = nodeInfo.getCoreThread();
+        if (coreThread <= 0) coreThread = 4;
         poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
         ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
         return clientPool;

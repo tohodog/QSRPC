@@ -36,11 +36,11 @@ public class TestConcurrent {
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
-    private final static int count = 125000;//
-    private final static int thread = 8;//8个请求线程
+    private final static int count = 12500;//
+    private final static int thread = DEFAULT_THREAD_POOL_SIZE;//8个请求线程
     private final static long len = count * thread;//总共请求
     private final static String zip = "";
-    private final static int timeout = 30_000;
+    private final static int timeout = 60_000;
 
 
     //加上包头包尾一个消息长度128字节
@@ -79,8 +79,12 @@ public class TestConcurrent {
 
     //=================使用连接池=================
     static long temp = 0;
-    static long requse;
-    static Map<Integer, Long> map = new ConcurrentHashMap<>();
+    static volatile long requse;
+    static volatile Map<Integer, Long> map = new ConcurrentHashMap<>();
+
+    private static synchronized void requestAdd(int id) {
+        requse += (System.currentTimeMillis() - map.get(id));
+    }
 
     //异步POOL
     //use time:12150 ,qps:82304 ,流量:10288KB/s ,平均请求延时:136
@@ -99,7 +103,7 @@ public class TestConcurrent {
 
         @Override
         public void handleResult(Message res) {
-            requse += (System.currentTimeMillis() - map.get(res.getId()));
+            requestAdd(res.getId());
             if (res.getId() == len) {
                 System.out.println("callback id-" + res.getId());
                 long use = System.currentTimeMillis() - temp;
@@ -167,12 +171,12 @@ public class TestConcurrent {
 
     //同步
     static Runnable syncSINGLE = new Runnable() {
-
         @Override
         public void run() {
             // tcp长连接
             TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
             client.connect();
+
             for (int i = 0; i < count; i++) {
                 Message msg = new Message();
                 msg.setId(Message.createID());
