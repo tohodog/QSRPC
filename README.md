@@ -10,6 +10,7 @@
   * 使用长连接TCP池,netty作为网络IO,支持全双工通信,高性能
   * 消息发送支持异步/同步,NIO
   * 自动选择符合action节点服务器,支持权重分发消息
+  * 支持snappy,gzip压缩
   * 可进行二次封装开发,远程调用(计划中),消息路由负载均衡等等
   * 欢迎学习交流~
 
@@ -26,7 +27,7 @@
 	<dependency>
 	    <groupId>com.github.tohodog</groupId>
 	    <artifactId>QSRPC</artifactId>
-	    <version>1.0.1</version>
+	    <version>1.1.0</version>
 	</dependency>
 ``` 
 
@@ -117,6 +118,9 @@ qsrpc.node.weight=1
  
 
 ## Log
+### v1.1.0(2020-11-11)
+  * Support compress
+  * Optimization
 ### v1.0.1(2019-09-26)
   * Support future get
   * Optimization
