@@ -20,9 +20,8 @@ public class ZookeeperManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperManager.class);
 
-    private static final int ZK_SESSION_TIMEOUT = 10000;
+    private static final int ZK_SESSION_TIMEOUT = 15000;
 
-    private CountDownLatch latch = new CountDownLatch(1);
 
     private volatile List<byte[]> nodeDatas = new ArrayList<>();
 
@@ -42,6 +41,7 @@ public class ZookeeperManager {
      */
     private ZooKeeper connectServer() {
         ZooKeeper zk = null;
+        final CountDownLatch latch = new CountDownLatch(1);
         try {
             zk = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 @Override
@@ -77,6 +77,8 @@ public class ZookeeperManager {
                 public void process(WatchedEvent event) {
                     logger.info("WatchedEvent.watchNode:" + event.getState());
                     if (event.getType() == Event.EventType.NodeChildrenChanged) {
+                        watchNode(watchNode);
+                    } else if (event.getState() == Event.KeeperState.SyncConnected) {
                         watchNode(watchNode);
                     }
                 }

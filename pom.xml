@@ -6,7 +6,7 @@
 
     <groupId>org.song</groupId>
     <artifactId>qsrpc</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
 
     <name>QSRpc</name>
     <url>http://maven.apache.org</url>
