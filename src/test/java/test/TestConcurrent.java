@@ -30,21 +30,21 @@ import java.util.concurrent.*;
  */
 public class TestConcurrent {
 
-    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors()*2;
 
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(DEFAULT_THREAD_POOL_SIZE,
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
     private final static int count = 12500;//
-    private final static int thread = DEFAULT_THREAD_POOL_SIZE;//8个请求线程
+    private final static int thread = DEFAULT_THREAD_POOL_SIZE;//x个请求线程
     private final static long len = count * thread;//总共请求
-    private final static String zip = "";
+    private final static String zip = "";//gzip snappy
     private final static int timeout = 60_000;
 
 
-    //加上包头包尾一个消息长度128字节
-    private static byte[] req = new byte[116];
+    //加上包头包尾一个消息长度128字节,可加大测试带宽
+    private static byte[] req = new byte[11600];
 
     static {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
@@ -107,6 +107,11 @@ public class TestConcurrent {
             if (res.getId() == len) {
                 System.out.println("callback id-" + res.getId());
                 long use = System.currentTimeMillis() - temp;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 System.err.println("use time:" + use +
                         " ,qps:" + len * 1000 / use +
                         " ,流量:" + len * (res.getContent().length + 12) / 1024 * 1000 / use + "KB/s" +

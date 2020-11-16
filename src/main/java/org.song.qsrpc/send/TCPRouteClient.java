@@ -37,9 +37,9 @@ public class TCPRouteClient {
 
     private static final boolean tcpNodelay = false;
 
-    private static final int soRcvbuf = 1024 * 128;
+    private static final int soRcvbuf = 1024 * 256;
 
-    private static final int soSndbuf = 1024 * 128;
+    private static final int soSndbuf = 1024 * 256;
 
     private String ip;
     private int port;
