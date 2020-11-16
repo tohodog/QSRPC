@@ -51,10 +51,11 @@ public class Zip {
         IZip gzip = new IZip() {
             @Override
             public byte[] compress(byte[] bytes) throws IOException {
-                long l = System.currentTimeMillis();
+//                long l = System.currentTimeMillis();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 GZIPOutputStream gzip = new GZIPOutputStream(out);
                 gzip.write(bytes);
+                gzip.flush();
                 gzip.close();
                 bytes = out.toByteArray();
 //                System.out.println("压缩+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
@@ -63,7 +64,7 @@ public class Zip {
 
             @Override
             public byte[] uncompress(byte[] bytes) throws IOException {
-                long l = System.currentTimeMillis();
+//                long l = System.currentTimeMillis();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 ByteArrayInputStream in = new ByteArrayInputStream(bytes);
                 GZIPInputStream ungzip = new GZIPInputStream(in);
@@ -73,6 +74,7 @@ public class Zip {
                     out.write(buffer, 0, n);
                 }
                 bytes = out.toByteArray();
+                ungzip.close();//必须要写,不然内存卡死
 //                System.out.println("解压+" + bytes.length + " t:" + (System.currentTimeMillis() - l));
                 return bytes;
             }
