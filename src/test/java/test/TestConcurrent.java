@@ -27,7 +27,7 @@ import java.util.concurrent.*;
  * 类说明
  * tcp链接性能测试,发送和接收都是本程序,所以测试结果低于理论性能
  * cpu:8100
- * TODO 测试记得关闭run日志窗口,非常影响测试性能
+ * TODO 测试需要关闭run日志窗口,360等杀毒软件,非常影响测试性能
  */
 public class TestConcurrent {
 
@@ -37,7 +37,7 @@ public class TestConcurrent {
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
-    private final static int count = 125000;//
+    private final static int count = 50000;//
     private final static int thread = DEFAULT_THREAD_POOL_SIZE;//x个请求线程
     private final static long len = count * thread;//总共请求
     private final static String zip = "";//gzip snappy
