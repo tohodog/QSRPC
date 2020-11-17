@@ -116,13 +116,14 @@ qsrpc.node.weight=1
     System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
 ## Test
-Run [TestConcurrent.java]([testjava]) (Don't open the console)
+Run [TestConcurrent.java]([testjava]) (Don't open the console and 360 antivirus etc.)
 
 |  CPU   | request  | time  |qps  |
 |  ----  | ----  |----  |----  |
-| i3-8100(4-core) | 100w(8-thread) |7817ms | 127926  |
+| i3-8100(4-core/4-thread) | 100w(8-thread) |7817ms | 127926  |
+| i7-8700(6-core/12-thread) | 120w(24-thread) |4930ms | 243407  |
 
-4核自发自收的情况下有12万+的并发数,实际会更高 [Test截图][testpng]
+在4核自发自收的情况下有12万+的并发数,实际会更高 [测试截图1][testpng] [测试截图2][testpng2]
 
 ## Future
   * Support eureka nacos...
@@ -145,6 +146,7 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
 [adpng]: https://gitee.com/sakaue/QSRPC/raw/master/Architecture_diagram.jpg
 [testpng]: https://gitee.com/sakaue/QSRPC/raw/master/test.png
 [testjava]: https://gitee.com/sakaue/QSRPC/raw/master/src/test/java/TestConcurrent.java
+[testpng2]: https://gitee.com/sakaue/QSRPC/raw/master/test2.png
 
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
