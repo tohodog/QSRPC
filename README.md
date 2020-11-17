@@ -2,6 +2,7 @@
 <br/>
 <br/>
 ---
+一个基于zookeeper服务发现、netty长连接池的高性能轻量级RPC框架
 <br/>
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
@@ -11,7 +12,7 @@
   * 消息发送支持异步/同步,NIO
   * 自动选择符合action节点服务器,支持权重分发消息
   * 支持snappy,gzip压缩
-  * 可进行二次封装开发,远程调用(计划中),消息路由负载均衡等等
+  * 可进行二次封装开发,[远程调用][qsrpc-starter],消息路由负载均衡等等
   * 欢迎学习交流~
 
 ![ad][adpng]
@@ -157,3 +158,5 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
 
 [starsvg]: https://img.shields.io/github/stars/tohodog/QSRPC.svg?style=social&label=Stars
 [star]: https://gitee.com/sakaue/QSRPC
+
+[qsrpc-starter]: https://gitee.com/sakaue/QSRPC-starter
