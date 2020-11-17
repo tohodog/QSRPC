@@ -13,6 +13,7 @@ import java.util.Properties;
  */
 public class ServerConfig {
     private final static String PROPRETIES_PATH = "/application.properties";
+    public final static String KEY_RPC_CFG_LOG = "qsrpc.cfg.log";
 
     public final static String KEY_RPC_ZK_IPS = "qsrpc.zk.ips";
     public final static String KEY_RPC_ZK_PATH = "qsrpc.zk.path";
@@ -35,6 +36,9 @@ public class ServerConfig {
 
     public final static Properties properties;
 
+    public static final boolean VALUE_LOG;
+
+
     static {
         properties = new Properties();
         try {
@@ -43,6 +47,7 @@ public class ServerConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        VALUE_LOG = "true".equalsIgnoreCase(getString(ServerConfig.KEY_RPC_CFG_LOG));
     }
 
     public static int getInt(String key) {

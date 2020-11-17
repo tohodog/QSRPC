@@ -6,6 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
+import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.RPCClientManager;
 
 /**
@@ -29,7 +30,8 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-//        logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
+        if (ServerConfig.VALUE_LOG)
+            logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
 
         Runnable work = new Runnable() {
 
