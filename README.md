@@ -120,7 +120,8 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
 |  CPU   | request  | time  |qps  |
 |  ----  | ----  |----  |----  |
 | i3-8100(4-core) | 100w(8-thread) |7817ms | 127926  |
-4核自发自收的情况下有12万+的并发数,实际会更高 [Test screenshot][testpng]
+
+4核自发自收的情况下有12万+的并发数,实际会更高 [Test截图][testpng]
 
 ## Future
   * Support eureka nacos...
@@ -145,10 +146,10 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
 [testjava]: https://raw.githubusercontent.com/tohodog/QSRPC/master/src/test/java/TestConcurrent.java
 
 
-[nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
+[nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
 [netty]: https://github.com/netty/netty
 
-[zksvg]: https://img.shields.io/badge/zookeeper-3.4.10-blue.svg
+[zksvg]: https://img.shields.io/badge/zookeeper-3.4.14-blue.svg
 [zk]: https://github.com/apache/zookeeper
 
 [licensesvg]: https://img.shields.io/badge/License-Apache--2.0-red.svg
