@@ -73,7 +73,7 @@ public class TCPRouteClient {
         if (isConnect())
             return;
         try {
-            bossGroup = new NioEventLoopGroup(zip == 0 ? 1 : Runtime.getRuntime().availableProcessors());//有压缩增加线程数
+            bossGroup = new NioEventLoopGroup(zip == 0 ? 1 : 1);//有压缩增加线程数...待定
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connTimeout);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, soKeepalive);

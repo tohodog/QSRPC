@@ -6,7 +6,7 @@
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
-  * 使用zookeeper服务发现
+  * 使用zookeeper服务发现,自动注册扩展服务
   * 使用长连接TCP池,netty作为网络IO,支持全双工通信,高性能
   * 消息发送支持异步/同步,NIO
   * 自动选择符合action节点服务器,支持权重分发消息
@@ -29,7 +29,7 @@
 	    <artifactId>QSRPC</artifactId>
 	    <version>1.1.0</version>
 	</dependency>
-``` 
+```
 
 ## Demo
 First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
@@ -114,9 +114,17 @@ qsrpc.node.weight=1
     CallFuture<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
     System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
+## Test
+Run [TestConcurrent.java]() (Don't open the console)
 
- 
+|  CPU   | request  | time  |qps  |
+|  ----  | ----  |----  |----  |
+| i3-8100(4-core) | 100w(8-thread) |7817ms | 127926  |
+4核自发自收的情况下有12万+的并发数,实际会更高 [Test screenshot][testpng]
 
+## Future
+  * Support eureka nacos...
+  
 ## Log
 ### v1.1.0(2020-11-11)
   * Support compress
@@ -133,6 +141,7 @@ qsrpc.node.weight=1
   
 [logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
 [adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.jpg
+[testpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/test.png
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
 [netty]: https://github.com/netty/netty

@@ -25,8 +25,9 @@ import java.util.concurrent.*;
  * @date 2018年12月26日 下午7:59:14
  * <p>
  * 类说明
- * tcp链接性能测试,发送和接收都是本程序,所以并发结果*2=理论性能
+ * tcp链接性能测试,发送和接收都是本程序,所以测试结果低于理论性能
  * cpu:8100
+ * TODO 测试记得关闭run日志窗口,非常影响测试性能
  */
 public class TestConcurrent {
 
@@ -36,15 +37,15 @@ public class TestConcurrent {
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     private final static int PORT;
-    private final static int count = 12500;//
+    private final static int count = 125000;//
     private final static int thread = DEFAULT_THREAD_POOL_SIZE;//x个请求线程
     private final static long len = count * thread;//总共请求
     private final static String zip = "";//gzip snappy
     private final static int timeout = 60_000;
 
 
-    //加上包头包尾一个消息长度128字节,可加大测试带宽
-    private static byte[] req = new byte[11600];
+    //加上包头包尾长度12字节,可加大测试带宽 (目前发现一些环境带宽跑不高待测试)
+    private static byte[] req = new byte[116];
 
     static {
         PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
@@ -87,7 +88,7 @@ public class TestConcurrent {
     }
 
     //异步POOL
-    //use time:12150 ,qps:82304 ,流量:10288KB/s ,平均请求延时:136
+    //4-core-> time:7774 ,qps:128633 ,流量:16079KB/s ,平均请求延时:360
     static Runnable asyncPOOL = new Runnable() {
         @Override
         public void run() {
@@ -112,7 +113,7 @@ public class TestConcurrent {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.err.println("use time:" + use +
+                System.err.println(Runtime.getRuntime().availableProcessors()+"-core-> time:" + use +
                         " ,qps:" + len * 1000 / use +
                         " ,流量:" + len * (res.getContent().length + 12) / 1024 * 1000 / use + "KB/s" +
                         " ,平均请求延时:" + (requse / len)
@@ -156,7 +157,7 @@ public class TestConcurrent {
     // ==================test single==================
 
     //异步
-    //use time:9575 ,qps:104438 ,流量:13054KB/s ,平均请求延时:524
+    //use time:7088 ,qps:141083 ,流量:17635KB/s ,平均请求延时:892
     static Runnable asyncSINGLE = new Runnable() {
 
         @Override
