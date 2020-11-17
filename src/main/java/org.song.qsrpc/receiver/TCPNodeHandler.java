@@ -6,6 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
+import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.RPCClientManager;
 
 /**
@@ -29,11 +30,12 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-        logger.info("receiverMessage:" + msg.getId() + "," + ctx.channel());
-        // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
-        workerGroup.execute(new Runnable() {
+        if (ServerConfig.VALUE_LOG)
+            logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
 
-            boolean flag;
+        Runnable work = new Runnable() {
+
+            private boolean flag;
 
             @Override
             public void run() {
@@ -45,7 +47,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
                         }
                     };
                     cb(messageListener.onMessage(async, msg.getContent()));
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
@@ -56,11 +58,17 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
                 Message msg_cb = new Message();
                 msg_cb.setId(msg.getId());
+                msg_cb.setZip(msg.getZip());
                 msg_cb.setContent(message);
                 ctx.writeAndFlush(msg_cb);
                 flag = true;
             }
-        });
+        };
+
+        work.run();
+        // rpc消息基本都是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去
+        //此操作会导致延迟变大!!,禁用
+//        workerGroup.execute(work);
     }
 
 

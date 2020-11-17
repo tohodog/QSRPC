@@ -36,8 +36,9 @@ public class NodePoolManager {
     private Map<String, NoteRequestInfo> nodeReqInfoMap = new HashMap<>();// key:action
 
     public void initNodePool() {
-        String ips = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_IPS);
+        String ips = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
         String path = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
+        if (path == null) path = "/qsrpc";
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
             //监听节点信息
@@ -69,10 +70,10 @@ public class NodePoolManager {
             // 新建新加节点连接池
             Set<String> newNodeMark = new HashSet<>();
             for (NodeInfo nodeInfo : nodeDatas) {
-                String mark = nodeInfo.getMark();
+                String mark = nodeInfo.id();
                 newNodeMark.add(mark);
                 if (!clientPoolMap.containsKey(mark)) {
-                    clientPoolMap.put(nodeInfo.getMark(), buildClientPool(nodeInfo));
+                    clientPoolMap.put(nodeInfo.id(), buildClientPool(nodeInfo));
                     logger.info("createClientPool:" + mark);
                 }
             }
@@ -92,7 +93,7 @@ public class NodePoolManager {
             nodeReqInfoMap.clear();
             // 把节点按action分组,也就是同样服务功能的服务器放一起
             for (NodeInfo nodeInfo : nodeDatas) {
-                String[] actions = nodeInfo.getAction().split(",");
+                String[] actions = nodeInfo.getActions();
                 for (String action : actions) {
                     List<NodeInfo> actionList = nodeInfoMap.get(action);
                     if (actionList == null) {
@@ -119,7 +120,7 @@ public class NodePoolManager {
         try {
             lock.readLock().lock();
             List<NodeInfo> actionList = nodeInfoMap.get(action);
-            if (actionList == null || actionList.size() == 0) {
+            if (actionList == null) {// || actionList.size() == 0) {
                 logger.info("chooseClientPool: can not find pool - " + action);
                 return null;
             }
@@ -135,10 +136,10 @@ public class NodePoolManager {
             for (NodeInfo n : actionList) {
                 weight += n.getWeight();
                 if (weight > nowIndex) {
-                    return clientPoolMap.get(n.getMark());
+                    return clientPoolMap.get(n.id());
                 }
             }
-            return clientPoolMap.get(actionList.get(0).getMark());
+            return clientPoolMap.get(actionList.get(0).id());
 
         } finally {
             lock.readLock().unlock();
@@ -148,10 +149,10 @@ public class NodePoolManager {
 
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
         PoolConfig poolConfig = new PoolConfig();
+        int coreThread = nodeInfo.getCoreThread();
+        if (coreThread <= 0) coreThread = 4;
         poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
-
-        ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()));
-
+        ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
         return clientPool;
 
     }

@@ -55,7 +55,7 @@ public class CallbackPool {
                     @SuppressWarnings("unchecked")
                     Callback<Message> cb = (Callback<Message>) CALLBACK_MAP.remove(requestId);
                     if (cb != null) {
-                        cb.handleError(new RPCException("CallBackool time out"));
+                        cb.handleError(new RPCException("CallBackool time out, " + requestId));
                     }
                 }
             }, timeout, TimeUnit.MILLISECONDS));

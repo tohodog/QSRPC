@@ -20,9 +20,8 @@ public class ZookeeperManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperManager.class);
 
-    private static final int ZK_SESSION_TIMEOUT = 10000;
+    private static final int ZK_SESSION_TIMEOUT = 15000;
 
-    private CountDownLatch latch = new CountDownLatch(1);
 
     private volatile List<byte[]> nodeDatas = new ArrayList<>();
 
@@ -42,6 +41,7 @@ public class ZookeeperManager {
      */
     private ZooKeeper connectServer() {
         ZooKeeper zk = null;
+        final CountDownLatch latch = new CountDownLatch(1);
         try {
             zk = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 @Override
@@ -60,7 +60,7 @@ public class ZookeeperManager {
             } else {
                 logger.error("zookeeper conenct server timeout");
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             logger.error("zookeeper conenct server failed", e);
         }
         return zk;
@@ -78,6 +78,8 @@ public class ZookeeperManager {
                     logger.info("WatchedEvent.watchNode:" + event.getState());
                     if (event.getType() == Event.EventType.NodeChildrenChanged) {
                         watchNode(watchNode);
+                    } else if (event.getState() == Event.KeeperState.SyncConnected) {
+                        watchNode(watchNode);
                     }
                 }
             });
@@ -92,7 +94,7 @@ public class ZookeeperManager {
             watchNode.onNodeDataChange(data);
             // logger.info("Service discovery triggered updating connected server node, node
             // data: {}", dataList);
-        } catch (KeeperException | InterruptedException e) {
+        } catch (Exception e) {
             logger.error("Service discovery failed", e);
         }
     }
@@ -118,8 +120,8 @@ public class ZookeeperManager {
             return true;
         } catch (KeeperException e) {
             logger.error("createChildNode.KeeperException", e);
-        } catch (InterruptedException ex) {
-            logger.error("createChildNode.InterruptedException", ex);
+        } catch (Exception ex) {
+            logger.error("createChildNode.Exception", ex);
         }
         return false;
     }
@@ -143,8 +145,8 @@ public class ZookeeperManager {
             }
         } catch (KeeperException e) {
             logger.error("checkRootNode.KeeperException", e);
-        } catch (InterruptedException e) {
-            logger.error("checkRootNode.InterruptedException", e);
+        } catch (Exception e) {
+            logger.error("checkRootNode.Exception", e);
         }
     }
 

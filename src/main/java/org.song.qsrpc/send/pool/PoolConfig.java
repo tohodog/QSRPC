@@ -15,14 +15,14 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最大数量。 默认值是8，如果是负值表示没限制。 这个根据分布式服务器的cpu线程数 *2
      */
-    private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
+    private int maxIdle = Runtime.getRuntime().availableProcessors() * 2;
 
     /**
      * whenExhaustedAction如果是WHEN_EXHAUSTED_BLOCK，指定等待的毫秒数。<br/>
      * 如果maxWait是正数，那么会等待maxWait的毫秒的时间，超时会抛出NoSuchElementException异常 ；<br/>
      * 如果maxWait为负值，会永久等待。 maxWait的默认值是-1。
      */
-    private long maxWait = RPCClientManager.ReadTimeout;// GenericObjectPool.DEFAULT_MAX_WAIT;
+    private long maxWait = RPCClientManager.RpcTimeout;// GenericObjectPool.DEFAULT_MAX_WAIT;
 
     /**
      * 如果testOnBorrow被设置，pool会在borrowObject返回对象之前使用PoolableObjectFactory的validateObject来验证这个对象是否有效，要是对象没通过验证，这个对象会被丢弃，
@@ -36,7 +36,7 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最小数量。 默认值是0。
      */
-    private int minIdle = maxIdle;
+    private int minIdle = 0;
 
     /**
      * 控制池中对象的最大数量。 默认值是8，如果是负值表示没限制。 TODO 超出maxIdle会频繁创建销毁

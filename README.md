@@ -2,34 +2,35 @@
 <br/>
 <br/>
 ---
-一个基于zookeeper服务发现、netty长连接池的高性能远程调用RPC框架
+一个基于zookeeper服务发现、netty长连接池的高性能轻量级RPC框架
 <br/>
 
 [![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
-  * 使用zookeeper服务发现
+  * 使用zookeeper服务发现,自动注册扩展服务
   * 使用长连接TCP池,netty作为网络IO,支持全双工通信,高性能
   * 消息发送支持异步/同步,NIO
   * 自动选择符合action节点服务器,支持权重分发消息
-  * 可进行二次封装开发,远程调用(计划中),消息路由负载均衡等等
+  * 支持snappy,gzip压缩
+  * 可进行二次封装开发,[远程调用][qsrpc-starter],消息路由负载均衡等等
   * 欢迎学习交流~
 
 ![ad][adpng]
 ## Maven
 ```
+	<dependency>
+	    <groupId>com.gitee.sakaue</groupId>
+	    <artifactId>QSRPC</artifactId>
+	    <version>1.1.0</version>
+	</dependency>
+
 	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
 		    <url>https://jitpack.io</url>
 		</repository>
 	</repositories>
-
-	<dependency>
-	    <groupId>com.github.tohodog</groupId>
-	    <artifactId>QSRPC</artifactId>
-	    <version>1.0.2</version>
-	</dependency>
-``` 
+```
 
 ## Demo
 First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
@@ -114,11 +115,23 @@ qsrpc.node.weight=1
     CallFuture<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
     System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
+## Test
+Run [TestConcurrent.java]([testjava]) (Don't open the console)
 
- 
+|  CPU   | request  | time  |qps  |
+|  ----  | ----  |----  |----  |
+| i3-8100(4-core) | 100w(8-thread) |7817ms | 127926  |
 
+4核自发自收的情况下有12万+的并发数,实际会更高 [Test截图][testpng]
+
+## Future
+  * Support eureka nacos...
+  
 ## Log
-### v1.0.2(2019-09-26)
+### v1.1.0(2020-11-11)
+  * Support compress
+  * Optimization
+### v1.0.1(2019-09-26)
   * Support future get
   * Optimization
 ### v1.0.0(2019-09-19)
@@ -126,19 +139,24 @@ qsrpc.node.weight=1
 
 ## Other
   * 有问题请Add [issues](https://gitee.com/sakaue/QSRPC/issues)
-  * 如果项目对你有帮助的话欢迎star
+  * 如果项目对你有帮助的话欢迎[star][star]
   
-[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
-[adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.jpg
+[logopng]: https://gitee.com/sakaue/QSRPC/raw/master/logo.png
+[adpng]: https://gitee.com/sakaue/QSRPC/raw/master/Architecture_diagram.jpg
+[testpng]: https://gitee.com/sakaue/QSRPC/raw/master/test.png
+[testjava]: https://gitee.com/sakaue/QSRPC/raw/master/src/test/java/TestConcurrent.java
 
-[nettysvg]: https://img.shields.io/badge/netty-4.1.13-greed.svg
+
+[nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
 [netty]: https://github.com/netty/netty
 
-[zksvg]: https://img.shields.io/badge/zookeeper-3.4.10-blue.svg
+[zksvg]: https://img.shields.io/badge/zookeeper-3.4.14-blue.svg
 [zk]: https://github.com/apache/zookeeper
 
 [licensesvg]: https://img.shields.io/badge/License-Apache--2.0-red.svg
-[license]: https://github.com/tohodog/QSVideoPlayer/blob/master/LICENSE
+[license]: https://gitee.com/sakaue/QSRPC/raw/master/LICENSE
 
 [starsvg]: https://img.shields.io/github/stars/tohodog/QSRPC.svg?style=social&label=Stars
-[star]: https://github.com/tohodog/QSRPC
+[star]: https://gitee.com/sakaue/QSRPC
+
+[qsrpc-starter]: https://gitee.com/sakaue/QSRPC-starter
