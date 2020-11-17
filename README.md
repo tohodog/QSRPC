@@ -17,18 +17,18 @@
 ![ad][adpng]
 ## Maven
 ```
+	<dependency>
+	    <groupId>com.gitee.sakaue</groupId>
+	    <artifactId>QSRPC</artifactId>
+	    <version>1.1.0</version>
+	</dependency>
+
 	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
 		    <url>https://jitpack.io</url>
 		</repository>
 	</repositories>
-
-	<dependency>
-	    <groupId>com.github.tohodog</groupId>
-	    <artifactId>QSRPC</artifactId>
-	    <version>1.1.0</version>
-	</dependency>
 ```
 
 ## Demo
@@ -137,13 +137,13 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
   * Open sourse
 
 ## Other
-  * 有问题请Add [issues](https://github.com/tohodog/QSRPC/issues)
-  * 如果项目对你有帮助的话欢迎[![star][starsvg]][star]
+  * 有问题请Add [issues](https://gitee.com/sakaue/QSRPC/issues)
+  * 如果项目对你有帮助的话欢迎[star][star]
   
-[logopng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/logo.png
-[adpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/Architecture_diagram.jpg
-[testpng]: https://raw.githubusercontent.com/tohodog/QSRPC/master/test.png
-[testjava]: https://raw.githubusercontent.com/tohodog/QSRPC/master/src/test/java/TestConcurrent.java
+[logopng]: https://gitee.com/sakaue/QSRPC/raw/master/logo.png
+[adpng]: https://gitee.com/sakaue/QSRPC/raw/master/Architecture_diagram.jpg
+[testpng]: https://gitee.com/sakaue/QSRPC/raw/master/test.png
+[testjava]: https://gitee.com/sakaue/QSRPC/raw/master/src/test/java/TestConcurrent.java
 
 
 [nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
@@ -153,7 +153,7 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console)
 [zk]: https://github.com/apache/zookeeper
 
 [licensesvg]: https://img.shields.io/badge/License-Apache--2.0-red.svg
-[license]: https://github.com/tohodog/QSVideoPlayer/blob/master/LICENSE
+[license]: https://gitee.com/sakaue/QSRPC/raw/master/LICENSE
 
 [starsvg]: https://img.shields.io/github/stars/tohodog/QSRPC.svg?style=social&label=Stars
-[star]: https://github.com/tohodog/QSRPC
+[star]: https://gitee.com/sakaue/QSRPC
