@@ -12,6 +12,7 @@ import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientFactory;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
+import org.song.qsrpc.zk.NodeInfo;
 
 import java.io.IOException;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.concurrent.*;
  */
 public class TestConcurrent {
 
-    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors()*2;
+    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(DEFAULT_THREAD_POOL_SIZE,
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
@@ -42,7 +43,7 @@ public class TestConcurrent {
     private final static int timeout = 60_000;
 
 
-    //加上包头包尾长度12字节,可加大测试带宽 (目前发现一些环境带宽跑不高待测试)
+    //加上包头包尾长度12字节,可加大测试带宽
     private static byte[] req = new byte[116];
 
     static {
@@ -50,7 +51,9 @@ public class TestConcurrent {
     }
 
     public static void main(String[] args) throws IOException {
-        new TCPNodeServer(NodeRegistry.buildNode(), new MessageListener() {
+        NodeInfo info = new NodeInfo();
+        info.setPort(10000);
+        new TCPNodeServer(info, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
 //                try {
@@ -111,7 +114,7 @@ public class TestConcurrent {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.err.println(Runtime.getRuntime().availableProcessors()+"-core-> time:" + use +
+                System.err.println(Runtime.getRuntime().availableProcessors() + "-core-> time:" + use +
                         " ,qps:" + len * 1000 / use +
                         " ,流量:" + len * (res.getContent().length + 12) / 1024 * 1000 / use + "KB/s" +
                         " ,平均请求延时:" + (requse / len)
