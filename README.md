@@ -116,7 +116,7 @@ qsrpc.node.weight=1
     System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
 ## Test
-Run [TestConcurrent.java]([testjava]) (Don't open the console and 360 antivirus etc.)
+Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus etc.)
 
 |  CPU   | request  | time  |qps  |
 |  ----  | ----  |----  |----  |
@@ -145,7 +145,7 @@ Run [TestConcurrent.java]([testjava]) (Don't open the console and 360 antivirus 
 [logopng]: https://gitee.com/sakaue/QSRPC/raw/master/logo.png
 [adpng]: https://gitee.com/sakaue/QSRPC/raw/master/Architecture_diagram.jpg
 [testpng]: https://gitee.com/sakaue/QSRPC/raw/master/test.png
-[testjava]: https://gitee.com/sakaue/QSRPC/raw/master/src/test/java/TestConcurrent.java
+[testjava]: https://gitee.com/sakaue/QSRPC/raw/master/src/test/java/test/TestConcurrent.java
 [testpng2]: https://gitee.com/sakaue/QSRPC/raw/master/test2.png
 
 
