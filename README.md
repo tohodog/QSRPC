@@ -116,7 +116,7 @@ qsrpc.node.weight=1
     System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 ```
 ## Test
-Run [TestConcurrent.java]([testjava]) (Don't open the console and 360 antivirus etc.)
+Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus etc.)
 
 |  CPU   | request  | time  |qps  |
 |  ----  | ----  |----  |----  |
