@@ -32,19 +32,6 @@ public class RPCClientManager {
         }
     }
 
-    /**
-     * true:
-     * 拿出连接对象发送信息后,马上放回pool,nio设计,连接池只要几个链接就够了(因为TCPClient支持全双工,所以可以同时发消息,不是http1.1的请求/响应模式)
-     * <p>
-     * 需要开启,但是要注意,因为同一个连接对象netty用的同一个线程处理
-     * <p>
-     * 解决1,需要接收方handler里再开一个线程池处理信息(目前用这种)
-     * 解决2,需要发送方每次通过另一个连接发送,pool连接数=接收方处理线程数(pool目前还没能实现)
-     * <p>
-     * false:等到响应/超时才放回连接池,如果请求延迟较大,将会阻塞无法发挥最大性能,解决方法是增大连接池
-     */
-    public static boolean POOL_NIO = true;// tcp链接协议不支持双工才需要false,如http
-
     private static volatile RPCClientManager instance;
 
     public static RPCClientManager getInstance() {
@@ -82,37 +69,17 @@ public class RPCClientManager {
     public byte[] sendSync(String action, byte[] content, int timeout) throws RPCException, InterruptedException {
         CallFuture<byte[]> callFuture = sendAsync(action, content, timeout);
         return callFuture.get(timeout, TimeUnit.MILLISECONDS);
-//        ClientPool clientPool = nodePoolManager.chooseClientPool(action);
-//        if (clientPool != null) {
-//            TCPRouteClient tcpClient = clientPool.getResource();
-//            if (tcpClient != null) {
-//                try {
-//                    Message request = new Message();
-//                    request.setId(Message.createID());
-//                    request.setContent(content);
-//                    logger.info("sendSync:" + action + "," + request.getId() + "," + tcpClient.getInfo());
-//                    return tcpClient.sendSync(request, timeout).getContent();
-//                } finally {
-//                    clientPool.returnResource(tcpClient);
-//                }
-//            } else {
-//                throw new RPCException("can get client from pool:" + action + "," + clientPool);
-//            }
-//        } else {
-//            logger.error("can no choose pool:" + action);
-//            throw new RPCException("can no choose pool:" + action);
-//        }
     }
 
     /**
-     * 异步Future,nio
+     * 异步Future
      */
     public CallFuture<byte[]> sendAsync(String action, byte[] content) {
         return sendAsync(action, content, RpcTimeout);
     }
 
     /**
-     * 异步Future,nio
+     * 异步Future
      */
     public CallFuture<byte[]> sendAsync(String action, byte[] content, int timeout) {
         CallFuture<byte[]> callback = CallFuture.<byte[]>newInstance();

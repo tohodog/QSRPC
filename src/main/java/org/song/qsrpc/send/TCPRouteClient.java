@@ -149,11 +149,15 @@ public class TCPRouteClient {
 
     /**
      * 异步发送,nio
+     *
+     * @param request  请求参数
+     * @param callback 异步回调
+     * @param timeout  CallbackPool上下文必须有超时remove机制,否则内存泄漏
      */
     public void sendAsync(Message request, Callback<Message> callback, int timeout) {
         if (isConnect()) {
             request.setZip(zip);
-            if (timeout <= 0) {
+            if (timeout <= 0) {//判断大于0,CallbackPool上下文必须有超时remove机制,否则内存泄漏
                 callback.handleError(new RPCException(getClass().getName() + ".sendAsync() timeout must >0 :" + timeout));
                 return;
             }
@@ -163,6 +167,19 @@ public class TCPRouteClient {
             callback.handleError(new RPCException(this.getClass().getName() + "-can no connect:" + getInfo()));
         }
 
+    }
+
+    /**
+     * 异步发送,future
+     *
+     * @param request 请求参数
+     * @param timeout CallbackPool上下文必须有超时remove机制,否则内存泄漏
+     * @return CallFuture<Message>
+     */
+    public CallFuture<Message> sendAsync(Message request, int timeout) {
+        CallFuture<Message> future = CallFuture.newInstance();
+        sendAsync(request, future, timeout);
+        return future;
     }
 
     /**
@@ -178,7 +195,7 @@ public class TCPRouteClient {
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } finally {
-                CallbackPool.remove(request.getId());
+                CallbackPool.remove(request.getId());//移除上下文
             }
         } else {
             throw new RPCException(getClass().getName() + ".sendSync() can no connect:" + getInfo());

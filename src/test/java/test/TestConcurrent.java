@@ -35,8 +35,8 @@ public class TestConcurrent {
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(DEFAULT_THREAD_POOL_SIZE,
             DEFAULT_THREAD_POOL_SIZE * 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
-    private final static int PORT;
-    private final static int count = 50000;//
+    private final static int PORT = 10086;
+    private final static int count = 125000;//
     private final static int thread = DEFAULT_THREAD_POOL_SIZE;//x个请求线程
     private final static long len = count * thread;//总共请求
     private final static String zip = "";//gzip snappy
@@ -46,13 +46,10 @@ public class TestConcurrent {
     //加上包头包尾长度12字节,可加大测试带宽
     private static byte[] req = new byte[116];
 
-    static {
-        PORT = ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_PORT);
-    }
 
     public static void main(String[] args) throws IOException {
         NodeInfo info = new NodeInfo();
-        info.setPort(10000);
+        info.setPort(PORT);
         new TCPNodeServer(info, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {

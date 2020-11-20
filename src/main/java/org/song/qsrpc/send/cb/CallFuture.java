@@ -12,8 +12,6 @@ import java.util.concurrent.TimeoutException;
  */
 public class CallFuture<T> implements Future<T>, Callback<T> {
 
-    private static final int MAX_WAIT = 60 * 60 * 1000;
-
     /**
      * 内部回调用的栅栏
      */
@@ -98,7 +96,11 @@ public class CallFuture<T> implements Future<T>, Callback<T> {
      */
     @Override
     public T get() throws InterruptedException, RPCException {
-        return get(MAX_WAIT, TimeUnit.MILLISECONDS);
+        latch.await();
+        if (error != null) {
+            throw new RPCException(error);
+        }
+        return result;
     }
 
     /**
@@ -107,14 +109,13 @@ public class CallFuture<T> implements Future<T>, Callback<T> {
      */
     @Override
     public T get(long timeout, TimeUnit unit) throws RPCException, InterruptedException {
-
         if (latch.await(timeout, unit)) {
             if (error != null) {
                 throw new RPCException(error);
             }
             return result;
         } else {
-            throw new RPCException("CallFuture get time out");
+            throw new RPCException("CallFuture get time out: " + unit.toMillis(timeout));
         }
     }
 

@@ -17,6 +17,7 @@ import org.song.qsrpc.zk.NodeInfo;
  * @date 2019年3月20日 下午2:16:41
  * <p>
  * 类说明
+ * 需要 application.properties
  */
 public class TestRPC extends TestCase {
     /**
