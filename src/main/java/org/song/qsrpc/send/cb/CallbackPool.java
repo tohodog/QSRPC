@@ -27,7 +27,7 @@ public class CallbackPool {
     /**
      * Map的并发度，也就是segament数量，读不锁写锁，
      */
-    private static final int CONCURRENCY_LEVEL = 16;
+    private static final int CONCURRENCY_LEVEL = Math.max(Runtime.getRuntime().availableProcessors() * 2, 8);
 
     /**
      * 保存键为调用的唯一标示requestId</tt>
@@ -45,7 +45,7 @@ public class CallbackPool {
      * @param callback  客户端句柄callback
      * @param timeout   客户端调用超时
      */
-    public static void put(final Integer requestId, Callback<?> callback, int timeout) {
+    public static void put(final Integer requestId, Callback<?> callback, final int timeout) {
         CALLBACK_MAP.putIfAbsent(requestId, callback);
         if (timeout > 0) {
             TIMEOUT_MAP.putIfAbsent(requestId, SCHEDULED_EXECUTOR_SERVICE.schedule(new Runnable() {
@@ -55,7 +55,7 @@ public class CallbackPool {
                     @SuppressWarnings("unchecked")
                     Callback<Message> cb = (Callback<Message>) CALLBACK_MAP.remove(requestId);
                     if (cb != null) {
-                        cb.handleError(new RPCException("CallBackool time out, " + requestId));
+                        cb.handleError(new RPCException("CallbackPool time out: " + timeout + "ms, id:" + requestId));
                     }
                 }
             }, timeout, TimeUnit.MILLISECONDS));
