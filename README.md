@@ -133,8 +133,8 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
   * Open sourse
 
 ## Other
-  * 有问题请Add [issues](https://gitee.com/sakaue/QSRPC/issues)
-  * 如果项目对你有帮助的话欢迎[star][star]
+  * 有问题请Add [issues](https://github.com/tohodog/QSRPC/issues)
+  * 如果项目对你有帮助的话欢迎[![starsvg]][star]
   
 [logopng]: https://gitee.com/sakaue/QSRPC/raw/master/logo.png
 [adpng]: https://gitee.com/sakaue/QSRPC/raw/master/Architecture_diagram.jpg
@@ -153,6 +153,6 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 [license]: https://gitee.com/sakaue/QSRPC/raw/master/LICENSE
 
 [starsvg]: https://img.shields.io/github/stars/tohodog/QSRPC.svg?style=social&label=Stars
-[star]: https://gitee.com/sakaue/QSRPC
+[star]: https://github.com/tohodog/QSRPC
 
-[qsrpc-starter]: https://gitee.com/sakaue/QSRPC-starter
+[qsrpc-starter]: https://github.com/tohodog/QSRPC-starter
