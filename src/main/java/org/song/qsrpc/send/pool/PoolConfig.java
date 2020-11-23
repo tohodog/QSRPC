@@ -15,7 +15,7 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最大数量。 默认值是8，如果是负值表示没限制。 这个根据分布式服务器的cpu线程数 *2
      */
-    private int maxIdle = Runtime.getRuntime().availableProcessors() * 2;
+    private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
 
     /**
      * whenExhaustedAction如果是WHEN_EXHAUSTED_BLOCK，指定等待的毫秒数。<br/>
@@ -58,8 +58,9 @@ public class PoolConfig {
 
     /**
      * 指定驱逐线程的休眠时间。如果这个值不是正数（>0），不会有驱逐线程运行。 timeBetweenEvictionRunsMillis的默认值是-1。
+     * 一分钟跑一次驱逐任务
      */
-    private long timeBetweenEvictionRunsMillis = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+    private long timeBetweenEvictionRunsMillis = 1000L * 60L;//GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS
 
     /**
      * 设置驱逐线程每次检测对象的数量。 这个设置仅在timeBetweenEvictionRunsMillis被设置成正值（>0）的时候才会生效。
@@ -80,7 +81,7 @@ public class PoolConfig {
      * （>0）的时候才会生效，并且这个配置能被minEvictableIdleTimeMillis配置取代（minEvictableIdleTimeMillis配置项的优先级更高）。
      * softMinEvictableIdleTimeMillis的默认值是-1。
      */
-    private long softMinEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    private long softMinEvictableIdleTimeMillis = timeBetweenEvictionRunsMillis;// GenericObjectPool.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
     /**
      * 设置后进先出的池策略。pool可以被配置成LIFO队列（last-in-first-out）或FIFO队列（first-in-first-out），来指定空闲对象被使用的次序。

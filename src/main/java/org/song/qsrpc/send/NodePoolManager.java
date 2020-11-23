@@ -152,6 +152,8 @@ public class NodePoolManager {
         int coreThread = nodeInfo.getCoreThread();
         if (coreThread <= 0) coreThread = 4;
         poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
+        poolConfig.setNumTestsPerEvictionRun(poolConfig.getMaxIdle());
+
         ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
         return clientPool;
 
