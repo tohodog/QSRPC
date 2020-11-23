@@ -24,7 +24,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageDecoder.class);
 
-    public static final int MAX_LEN = 1024 * 1024 * 128;//128M
+    public static final int MAX_LEN = ServerConfig.VALUE_MAXLEN + 10;
 
     private Message message;
     private int msgLength;

@@ -27,6 +27,7 @@ public class ServerConfig {
     public final static String KEY_RPC_NODE_ZIP = "qsrpc.node.zip";
 
     public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
+    public final static String KEY_RPC_MESSAGE_MAXLEN = "qsrpc.message.maxlen";
 
 
     public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
@@ -37,6 +38,7 @@ public class ServerConfig {
     public final static Properties properties;
 
     public static final boolean VALUE_LOG;
+    public static final int VALUE_MAXLEN;
 
 
     static {
@@ -47,27 +49,31 @@ public class ServerConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        VALUE_LOG = "true".equalsIgnoreCase(getString(ServerConfig.KEY_RPC_CFG_LOG));
+        VALUE_LOG = getBoolean(ServerConfig.KEY_RPC_CFG_LOG);
+        VALUE_MAXLEN = Integer.parseInt(getString(ServerConfig.KEY_RPC_MESSAGE_MAXLEN, 1024 * 1024 * 32 + ""));
     }
 
     public static int getInt(String key) {
-        return Integer.valueOf(getString(key));
+        return Integer.parseInt(getString(key));
     }
 
     public static long getLong(String key) {
-        return Long.valueOf(getString(key));
+        return Long.parseLong(getString(key));
     }
 
     public static boolean getBoolean(String key) {
-        return Boolean.valueOf(getString(key));
+        return Boolean.parseBoolean(getString(key));
     }
 
-    // 服务器配置必须存在,否则运行异常,防止BUG
     public static String getString(String key) {
-        String value = properties.getProperty(key);
-//		if (value == null)
-//			throw new RuntimeException(key + " property value is null");
-        return value;
+        return properties.getProperty(key);
+    }
+
+    public static String getString(String key, String def) {
+        if (containsKey(key))
+            return getString(key);
+        else
+            return def;
     }
 
     // 服务器配置必须存在,否则运行异常,防止BUG
