@@ -36,7 +36,7 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最小数量。 默认值是0。
      */
-    private int minIdle = 0;
+    private int minIdle = 1;
 
     /**
      * 控制池中对象的最大数量。 默认值是8，如果是负值表示没限制。 TODO 超出maxIdle会频繁创建销毁
@@ -86,6 +86,7 @@ public class PoolConfig {
     /**
      * 设置后进先出的池策略。pool可以被配置成LIFO队列（last-in-first-out）或FIFO队列（first-in-first-out），来指定空闲对象被使用的次序。
      * lifo的默认值是true。
+     * 这里设置先进先出,在并发时均匀使用这些连接,有利于接收端分发线程处理消息
      */
     private boolean lifo = !GenericObjectPool.DEFAULT_LIFO;
 
