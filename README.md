@@ -18,18 +18,11 @@
 ![ad][adpng]
 ## Maven
 ```
-	<dependency>
-	    <groupId>com.gitee.sakaue</groupId>
-	    <artifactId>QSRPC</artifactId>
-	    <version>1.1.0</version>
-	</dependency>
-
-	<repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
+<dependency>
+    <groupId>com.github.tohodog</groupId>
+    <artifactId>qsrpc</artifactId>
+    <version>1.1.1</version>
+</dependency>
 ```
 
 ## Demo
@@ -126,12 +119,13 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 在4核自发自收的情况下有12万+的并发数,实际会更高 [测试截图1][testpng] [测试截图2][testpng2]
 
 ## Future
-  * Support eureka nacos...
+  * Support nacos...
   
 ## Log
-### v1.1.0(2020-11-11)
+### v1.1.1(2020-11-22)
   * Support compress
-  * Optimization
+  * Optimization pool log test...
+
 ### v1.0.1(2019-09-26)
   * Support future get
   * Optimization
