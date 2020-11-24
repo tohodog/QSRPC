@@ -66,7 +66,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
         work.run();
 
-        // 1.如果rpc消息是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去,//此操作会导致高并发延迟变大!!,慎用,//此操作会导致高并发延迟变大!!,慎用,
+        // 1.如果rpc消息是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去. 此操作会导致高并发延迟变大!!
         // 2.发送端使用pool建立多个tcp链接可解决高并发延迟问题,又保证这边的性能不用再分发了
 //        workerGroup.execute(work);
     }

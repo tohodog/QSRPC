@@ -60,7 +60,7 @@ public class PoolConfig {
      * 指定驱逐线程的休眠时间。如果这个值不是正数（>0），不会有驱逐线程运行。 timeBetweenEvictionRunsMillis的默认值是-1。
      * 一分钟跑一次驱逐任务
      */
-    private long timeBetweenEvictionRunsMillis = 1000L * 60L;//GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS
+    private long timeBetweenEvictionRunsMillis = 1000L * 60L;//GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
     /**
      * 设置驱逐线程每次检测对象的数量。 这个设置仅在timeBetweenEvictionRunsMillis被设置成正值（>0）的时候才会生效。
@@ -86,18 +86,17 @@ public class PoolConfig {
     /**
      * 设置后进先出的池策略。pool可以被配置成LIFO队列（last-in-first-out）或FIFO队列（first-in-first-out），来指定空闲对象被使用的次序。
      * lifo的默认值是true。
-     * 这里设置先进先出,在并发时均匀使用这些连接,有利于接收端分发线程处理消息
+     * 这里设置先进先出,在并发时均匀使用这些连接,有利于接收端分发线程处理消息,但不利于驱逐策略
      */
     private boolean lifo = !GenericObjectPool.DEFAULT_LIFO;
 
     /**
-     * 指定池中对象被消耗完以后的行为，有下面这些选择： WHEN_EXHAUSTED_FAIL 0 WHEN_EXHAUSTED_GROW 2
-     * WHEN_EXHAUSTED_BLOCK 1
+     * 指定池中对象被消耗完以后的行为，有下面这些选择： WHEN_EXHAUSTED_FAIL 0 WHEN_EXHAUSTED_GROW 2 WHEN_EXHAUSTED_BLOCK 1
      * 如果是WHEN_EXHAUSTED_FAIL，当池中对象达到上限以后，继续borrowObject会抛出NoSuchElementException异常。
      * 如果是WHEN_EXHAUSTED_GROW，当池中对象达到上限以后，会创建一个新对象，并返回它。
      * 如果是WHEN_EXHAUSTED_BLOCK，当池中对象达到上限以后，会一直等待，直到有一个对象可用。这个行为还与maxWait有关
      * ，如果maxWait是正数，那么会等待maxWait的毫秒的时间，超时会抛出NoSuchElementException异常；如果maxWait为负值，会永久等待。
-     * whenExhaustedAction的默认值是WHEN_EXHAUSTED_BLOCK，maxWait的默认值是-1。
+     * whenExhaustedAction的默认值是WHEN_EXHAUSTED_BLOCK，maxWait的默认值是 1。
      */
     private byte whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
 

@@ -78,7 +78,7 @@ public abstract class Pool<T> {
 	 * @return
 	 */
 	public int getNumActive() {
-		if (this.internalPool == null || this.internalPool.isClosed()) {
+		if (this.internalPool.isClosed()) {
 			return -1;
 		}
 
@@ -91,7 +91,7 @@ public abstract class Pool<T> {
 	 * @return
 	 */
 	public int getNumIdle() {
-		if (this.internalPool == null || this.internalPool.isClosed()) {
+		if (this.internalPool.isClosed()) {
 			return -1;
 		}
 		return internalPool.getNumIdle();

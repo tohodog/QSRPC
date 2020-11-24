@@ -3,6 +3,7 @@ package org.song.qsrpc.send;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,12 +152,12 @@ public class NodePoolManager {
         PoolConfig poolConfig = new PoolConfig();
         int coreThread = nodeInfo.getCoreThread();
         if (coreThread <= 0) coreThread = 4;
-        poolConfig.setMaxIdle(nodeInfo.getCoreThread() * 2);
+        poolConfig.setMaxIdle(coreThread * 2);
         poolConfig.setNumTestsPerEvictionRun(poolConfig.getMaxIdle());
-
+        if (nodeInfo.isQueue())//请求-响应模式,pool.get()不进行等待,因为会自动吃满qps,没有空闲对象抛异常可以保证请求延时小
+            poolConfig.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL);
         ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
         return clientPool;
-
     }
 
     // 某个action节点组请求统计,方便扩展功能
