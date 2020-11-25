@@ -37,7 +37,7 @@ public class TestConcurrent {
 
     private final static int PORT = 10086;
     private final static int count = 125000;//
-    private final static int thread = 8;//x个请求线程
+    private final static int thread = DEFAULT_THREAD_POOL_SIZE;//x个请求线程
     private final static long len = count * thread;//总共请求
     private final static String zip = "";//gzip snappy
     private final static int timeout = 60_000;
@@ -60,11 +60,11 @@ public class TestConcurrent {
         Log.i("start ok!");
 
         for (int i = 0; i < thread; i++) {
-//            EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接,这个比较快,因为少了池获取操作,rpc框架考虑不使用连接池,通信只用一个tcp链接
             EXECUTOR_SERVICE.submit(asyncPOOL);//异步线程池
 
-//            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
 //            EXECUTOR_SERVICE.submit(syncPOOL);//同步线程池
+//            EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接
+//            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
         }
         temp = System.currentTimeMillis();
 
@@ -133,7 +133,6 @@ public class TestConcurrent {
                 Message res = sendSyncTest(msg);
                 requse += (System.currentTimeMillis() - map.get(res.getId()));
 
-//                System.out.println("syncPOOL id-" +res.getId());
                 if (res.getId() == len) {
                     System.out.println("callback id-" + res.getId());
                     long use = System.currentTimeMillis() - temp;
