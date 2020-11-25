@@ -114,7 +114,7 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 |  CPU   | request  | time  |qps  |
 |  ----  | ----  |----  |----  |
 | i3-8100(4-core/4-thread) | 100w(8-thread) |7817ms | 127926  |
-| i7-8700(6-core/12-thread) | 120w(24-thread) |4930ms | 243407  |
+| i7-8700(6-core/12-thread) | 100w(8-thread) |3010ms | 332225  |
 
 在4核自发自收的情况下有12万+的并发数,实际会更高 [测试截图1][testpng] [测试截图2][testpng2]
 
