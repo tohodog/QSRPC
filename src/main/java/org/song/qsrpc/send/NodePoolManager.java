@@ -32,9 +32,10 @@ public class NodePoolManager {
 
     // 所有节点的连接池
     private Map<String, ClientPool> clientPoolMap = new HashMap<>();// key:节点唯一标识
+
     // 按action分组的节点
-    private Map<String, List<NodeInfo>> nodeInfoMap = new HashMap<>();// key:action
-    private Map<String, NoteRequestInfo> nodeReqInfoMap = new HashMap<>();// key:action
+    private Map<String, ActionNodeContext> actionNodeContextMap = new HashMap<>();// key:action
+    private Map<String, NodeInfo> ipNodeMap = new HashMap<>();// key: ip:port
 
     public void initNodePool() {
         String ips = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
@@ -68,79 +69,67 @@ public class NodePoolManager {
         try {
             lock.writeLock().lock();
 
-            // 新建新加节点连接池
-            Set<String> newNodeMark = new HashSet<>();
+            // 新建新的节点连接池
+            Set<String> newNodeSet = new HashSet<>();
             for (NodeInfo nodeInfo : nodeDatas) {
-                String mark = nodeInfo.id();
-                newNodeMark.add(mark);
-                if (!clientPoolMap.containsKey(mark)) {
+                String id = nodeInfo.id();
+                newNodeSet.add(id);
+                if (!clientPoolMap.containsKey(id)) {
                     clientPoolMap.put(nodeInfo.id(), buildClientPool(nodeInfo));
-                    logger.info("createClientPool:" + mark);
+                    logger.info("createClientPool:" + id);
                 }
             }
             // 移除不存在节点连接池
             Iterator<String> iterator = clientPoolMap.keySet().iterator();
             while (iterator.hasNext()) {
-                String mark = iterator.next();
-                if (!newNodeMark.contains(mark)) {
-                    ClientPool clientPool = clientPoolMap.get(mark);
+                String id = iterator.next();
+                if (!newNodeSet.contains(id)) {
+                    ClientPool clientPool = clientPoolMap.get(id);
                     clientPool.destroy();
                     iterator.remove();
-                    logger.info("removeClientPool:" + mark);
+                    logger.info("removeClientPool:" + id);
                 }
             }
 
-            nodeInfoMap.clear();
-            nodeReqInfoMap.clear();
+            actionNodeContextMap.clear();
+            ipNodeMap.clear();
             // 把节点按action分组,也就是同样服务功能的服务器放一起
             for (NodeInfo nodeInfo : nodeDatas) {
+                ipNodeMap.put(nodeInfo.getIp() + ":" + nodeInfo.getPort(), nodeInfo);///按ip映射
                 String[] actions = nodeInfo.getActions();
                 for (String action : actions) {
-                    List<NodeInfo> actionList = nodeInfoMap.get(action);
-                    if (actionList == null) {
-                        actionList = new ArrayList<>();
-                        nodeInfoMap.put(action, actionList);
-                        nodeReqInfoMap.put(action, new NoteRequestInfo());
+                    ActionNodeContext actionNodeContext = actionNodeContextMap.get(action);
+                    if (actionNodeContext == null) {
+                        actionNodeContext = new ActionNodeContext();
+                        ActionNodeContext old = actionNodeContextMap.put(action, actionNodeContext);
+                        if (old != null) actionNodeContext = old;
                     }
-                    //10秒内重启服务器会出现重复节点,处理下
-                    if (!actionList.contains(nodeInfo)) {
-                        actionList.add(nodeInfo);
-                        nodeReqInfoMap.get(action).weightSum += nodeInfo.getWeight();
-                    }
+                    actionNodeContext.addNode(nodeInfo);
                 }
             }
-
+            //初始化权重数据
+            for (Map.Entry<String, ActionNodeContext> e : actionNodeContextMap.entrySet()) {
+                e.getValue().initWeight();
+            }
         } finally {
             lock.writeLock().unlock();
         }
 
     }
 
-    // 根据action选择服务器,支持权重
+    // 根据action/ip选择服务器,支持权重
     public ClientPool chooseClientPool(String action) {
         try {
             lock.readLock().lock();
-            List<NodeInfo> actionList = nodeInfoMap.get(action);
-            if (actionList == null) {// || actionList.size() == 0) {
+            ActionNodeContext actionNodeContext = actionNodeContextMap.get(action);
+            if (actionNodeContext == null) {
+                if (ipNodeMap.containsKey(action)) {//根据ip选择
+                    return clientPoolMap.get(ipNodeMap.get(action).id());
+                }
                 logger.info("chooseClientPool: can not find pool - " + action);
                 return null;
             }
-            NoteRequestInfo noteRequestInfo = nodeReqInfoMap.get(action);
-
-            int nowIndex = 0;
-            if (noteRequestInfo.weightSum > 0) {
-                nowIndex = (int) (noteRequestInfo.requestCount % noteRequestInfo.weightSum);
-            }
-            noteRequestInfo.requestCount++;
-
-            int weight = 0;
-            for (NodeInfo n : actionList) {
-                weight += n.getWeight();
-                if (weight > nowIndex) {
-                    return clientPoolMap.get(n.id());
-                }
-            }
-            return clientPoolMap.get(actionList.get(0).id());
+            return clientPoolMap.get(actionNodeContext.nextNode().id());
 
         } finally {
             lock.readLock().unlock();
@@ -162,9 +151,52 @@ public class NodePoolManager {
 
     // 某个action节点组请求统计,方便扩展功能
     // 目前实现按权重分配
-    public static class NoteRequestInfo {
-        public long requestCount;
-        public int weightSum;
+    public static class ActionNodeContext {
+        private final List<NodeInfo> nodeInfos = new ArrayList<>();
 
+        private short[] indexMap;//下标为weight,值为nodeInfos对应的节点index,提升选择性能
+        private volatile int weightIndex = -1;
+        private int weightSum;
+
+        public void addNode(NodeInfo nodeInfo) {
+            if (!nodeInfos.contains(nodeInfo)) {
+                nodeInfos.add(nodeInfo);
+            }
+        }
+
+        public void removeNode(NodeInfo nodeInfo) {
+            nodeInfos.remove(nodeInfo);
+        }
+
+        //根据权重获取节点
+        public NodeInfo nextNode() {
+            if (nodeInfos.size() == 1) return nodeInfos.get(0);
+            if (nodeInfos.size() == 0) return null;
+            return nodeInfos.get(indexMap[nextIndex()]);
+        }
+
+        //加锁,并发有安全问题
+        private synchronized int nextIndex() {
+            weightIndex++;
+            if (weightIndex >= weightSum) weightIndex = 0;
+            return weightIndex;
+        }
+
+        //刷新权重映射
+        private void initWeight() {
+            weightSum = 0;
+            for (NodeInfo nodeInfo : nodeInfos) weightSum += nodeInfo.getWeight();
+            indexMap = new short[weightSum];
+
+            short index = 0;
+            int offset = 0;
+            for (NodeInfo nodeInfo : nodeInfos) {
+                for (int i = 0; i < nodeInfo.getWeight(); i++) {
+                    indexMap[i + offset] = index;
+                }
+                offset += nodeInfo.getWeight();
+                index++;
+            }
+        }
     }
 }

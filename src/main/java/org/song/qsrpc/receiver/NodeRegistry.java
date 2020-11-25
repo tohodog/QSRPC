@@ -40,7 +40,7 @@ public class NodeRegistry {
         nodeInfo.setIp(node_ip);
         nodeInfo.setPort(port);
         if (weight != null) {
-            nodeInfo.setWeight(Integer.parseInt(weight));
+            nodeInfo.setWeight(Byte.parseByte(weight));
         }
         nodeInfo.setZkIps(zkIps);
         nodeInfo.setZkPath(zkPath);

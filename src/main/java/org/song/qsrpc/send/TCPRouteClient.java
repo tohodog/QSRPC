@@ -144,7 +144,11 @@ public class TCPRouteClient {
         if (channel != null)
             return channel.toString();
         else
-            return ip + ":" + port;
+            return getIpPort();
+    }
+
+    public String getIpPort() {
+        return ip + ":" + port;
     }
 
     /**

@@ -35,7 +35,7 @@ public class NodeInfo {
     private boolean queue;
 
     private int coreThread = Runtime.getRuntime().availableProcessors();//这个*2决定链接的tcp数量
-    private int weight = 1;
+    private byte weight = 1;
     private boolean ssl;
 
     public String getZkIps() {
@@ -108,16 +108,14 @@ public class NodeInfo {
 
     public void setCoreThread(int coreThread) {
         this.coreThread = coreThread;
-        mark = null;
     }
 
-    public int getWeight() {
+    public byte getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(byte weight) {
         this.weight = weight;
-        mark = null;
     }
 
     public boolean isSsl() {
