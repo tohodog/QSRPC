@@ -41,7 +41,7 @@ public class TCPNodeServer {
         // Configure SSL.
         final SslContext sslCtx = null;// getSslContext();
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup();// 默认cpu线程*2
+        workerGroup = new NioEventLoopGroup(nodeInfo.getCoreThread());// 默认cpu线程*2
         try {
             ServerBootstrap b = new ServerBootstrap();
             // BACKLOG用于构造服务端套接字ServerSocket对象，标识当服务器请求处理线程全满时，用于临时存放已完成三次握手的请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50

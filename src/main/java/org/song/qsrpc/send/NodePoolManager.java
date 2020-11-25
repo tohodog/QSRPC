@@ -140,8 +140,8 @@ public class NodePoolManager {
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
         PoolConfig poolConfig = new PoolConfig();
         int coreThread = nodeInfo.getCoreThread();
-        if (coreThread <= 0) coreThread = 4;
-        poolConfig.setMaxIdle(coreThread * 2);
+        if (coreThread <= 0) coreThread = 8;
+        poolConfig.setMaxIdle(coreThread);
         poolConfig.setNumTestsPerEvictionRun(poolConfig.getMaxIdle());
         if (nodeInfo.isQueue())//请求-响应模式,pool.get()不进行等待,因为会自动吃满qps,没有空闲对象抛异常可以保证请求延时小
             poolConfig.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL);

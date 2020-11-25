@@ -34,7 +34,7 @@ public class NodeInfo {
      */
     private boolean queue;
 
-    private int coreThread = Runtime.getRuntime().availableProcessors();//这个*2决定链接的tcp数量
+    private int coreThread = Runtime.getRuntime().availableProcessors() * 2;//这个决定工作线程数量和链接的tcp数量
     private byte weight = 1;
     private boolean ssl;
 
