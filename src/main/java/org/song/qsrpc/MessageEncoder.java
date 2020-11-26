@@ -31,6 +31,8 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
             out.writeInt(content.length + 8);
             out.writeInt(in.getId());
             out.writeByte(in.getVer());
+
+            //ver=0编码逻辑,后续更新通信版本需要区分处理逻辑
             out.writeByte(in.getZip());
             out.writeBytes(content);
             out.writeBytes(BYTE_END);

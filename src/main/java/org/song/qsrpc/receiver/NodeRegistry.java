@@ -44,8 +44,8 @@ public class NodeRegistry {
         }
         nodeInfo.setZkIps(zkIps);
         nodeInfo.setZkPath(zkPath);
-
-        nodeInfo.setCoreThread(Runtime.getRuntime().availableProcessors());
+        nodeInfo.setCoreThread(ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_THREAD, Runtime.getRuntime().availableProcessors() * 2));
+        nodeInfo.setZip(ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ZIP));
         return nodeInfo;
     }
 

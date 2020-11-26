@@ -59,15 +59,15 @@ public class MessageDecoder extends ByteToMessageDecoder {
         // 内容足够了,开始读取
         message.setId(in.readInt());
         message.setVer(in.readByte());
+
+        //ver=0逻辑,后续更新通信版本需要区分逻辑
         message.setZip(in.readByte());
         byte[] content = new byte[msgLength - 8];
         in.readBytes(content);
-
         // 是否压缩解码
         IZip iZip = Zip.get(message.getZip());
         if (iZip != null) content = iZip.uncompress(content);
         message.setContent(content);
-
         if (in.readByte() != '\r' || in.readByte() != '\n') {
             logger.error("decode-end_err(" + ctx + ")");
             init();
@@ -75,6 +75,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
+        //解析结束
         out.add(message);
         init();
     }

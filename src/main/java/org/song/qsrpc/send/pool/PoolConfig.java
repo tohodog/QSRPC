@@ -36,7 +36,7 @@ public class PoolConfig {
     /**
      * 控制池中空闲的对象的最小数量。 默认值是0。
      */
-    private int minIdle = 1;
+    private int minIdle = 0;
 
     /**
      * 控制池中对象的最大数量。 默认值是8，如果是负值表示没限制。 TODO 超出maxIdle会频繁创建销毁

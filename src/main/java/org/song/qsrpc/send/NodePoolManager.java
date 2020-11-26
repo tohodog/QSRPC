@@ -137,6 +137,7 @@ public class NodePoolManager {
 
     }
 
+    //建立pool
     private ClientPool buildClientPool(NodeInfo nodeInfo) {
         PoolConfig poolConfig = new PoolConfig();
         int coreThread = nodeInfo.getCoreThread();
@@ -145,8 +146,10 @@ public class NodePoolManager {
         poolConfig.setNumTestsPerEvictionRun(poolConfig.getMaxIdle());
         if (nodeInfo.isQueue())//请求-响应模式,pool.get()不进行等待,因为会自动吃满qps,没有空闲对象抛异常可以保证请求延时小
             poolConfig.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL);
-        ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort()), nodeInfo.isQueue());
-        return clientPool;
+
+        return new ClientPool(poolConfig,
+                new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort(), nodeInfo),
+                nodeInfo.isQueue());
     }
 
     // 某个action节点组请求统计,方便扩展功能

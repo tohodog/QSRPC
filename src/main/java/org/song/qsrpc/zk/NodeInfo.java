@@ -1,6 +1,7 @@
 package org.song.qsrpc.zk;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import org.song.qsrpc.Message;
 
 /**
  * @author song
@@ -22,6 +23,7 @@ public class NodeInfo {
     private int port;
 
     private String zip;// 压缩 snappy gzip
+    private byte ver = Message.VER;//支持的最新协议版本号
 
     /**
      * tcp连接通信模式:作为大量并发时的一个配置:
@@ -74,7 +76,7 @@ public class NodeInfo {
 
     public void setIp(String ip) {
         this.ip = ip;
-        mark = null;
+        id = null;
     }
 
     public int getPort() {
@@ -83,7 +85,7 @@ public class NodeInfo {
 
     public void setPort(int port) {
         this.port = port;
-        mark = null;
+        id = null;
     }
 
     public String getZip() {
@@ -92,6 +94,14 @@ public class NodeInfo {
 
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    public byte getVer() {
+        return ver;
+    }
+
+    public void setVer(byte ver) {
+        this.ver = ver;
     }
 
     public boolean isQueue() {
@@ -143,10 +153,10 @@ public class NodeInfo {
      * @return IP + ":" + port
      */
     @JSONField(serialize = false)
-    private transient String mark;
+    private transient String id;
 
     public String id() {
-        return mark != null ? mark : (mark = ip + ":" + port + "_" + time);
+        return id != null ? id : (id = ip + ":" + port + "_" + time);
     }
 
     @Override

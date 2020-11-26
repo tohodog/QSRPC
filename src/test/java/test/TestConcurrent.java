@@ -60,11 +60,12 @@ public class TestConcurrent {
         Log.i("start ok!");
 
         for (int i = 0; i < thread; i++) {
-            EXECUTOR_SERVICE.submit(asyncPOOL);//异步线程池
 
-//            EXECUTOR_SERVICE.submit(syncPOOL);//同步线程池
-//            EXECUTOR_SERVICE.submit(asyncSINGLE);//异步单链接
-//            EXECUTOR_SERVICE.submit(syncSINGLE);//同步单链接
+            //异步线程池
+            EXECUTOR_SERVICE.submit(asyncPOOL);
+
+            //同步线程池,本无业务逻辑测试qps只有异步的30% ,猜测请求线程频繁休眠唤醒耗费性能
+//            EXECUTOR_SERVICE.submit(syncPOOL);
         }
         temp = System.currentTimeMillis();
 
@@ -145,65 +146,16 @@ public class TestConcurrent {
         }
     };
 
-
-    // ==================test single==================
-
-    //异步
-    //use time:7088 ,qps:141083 ,流量:17635KB/s ,平均请求延时:892
-    static Runnable asyncSINGLE = new Runnable() {
-
-        @Override
-        public void run() {
-            // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
-            client.connect();
-            for (int i = 0; i < count; i++) {
-                Message msg = new Message();
-                msg.setId(Message.createID());
-                map.put(msg.getId(), System.currentTimeMillis());
-                msg.setContent(req);
-                client.sendAsync(msg, callback, timeout);
-            }
-        }
-    };
-
-    //同步
-    static Runnable syncSINGLE = new Runnable() {
-        @Override
-        public void run() {
-            // tcp长连接
-            TCPRouteClient client = new TCPRouteClient("127.0.0.1", PORT);
-            client.connect();
-
-            for (int i = 0; i < count; i++) {
-                Message msg = new Message();
-                msg.setId(Message.createID());
-                msg.setContent(req);
-                map.put(msg.getId(), System.currentTimeMillis());
-                try {
-                    Message res = client.sendSync(msg, timeout);
-                    requse += (System.currentTimeMillis() - map.get(res.getId()));
-
-                    if (res.getId() == len) {
-                        System.out.println("callback id-" + res.getId());
-                        long use = System.currentTimeMillis() - temp;
-                        System.err.println("use time:" + use +
-                                " ,qps:" + len * 1000 / use +
-                                " ,流量:" + len * (req.length + 12) / 1024 * 1000 / use + "KB/s"
-                                + " ,平均请求延时:" + (requse / len));
-                    }
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-
     // ==================建立一个 pool==================
+    static NodeInfo info = new NodeInfo();
+    static PoolConfig poolConfig = new PoolConfig();
 
-    static ClientPool clientPool = new ClientPool(new PoolConfig(), new ClientFactory("127.0.0.1", PORT, zip));//snappy
+    static {
+        info.setZip(zip);
+        poolConfig.setMaxIdle(DEFAULT_THREAD_POOL_SIZE);
+    }
+
+    static ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory("127.0.0.1", PORT, info));//snappy
 
     //同步
     static Message sendSyncTest(Message request) {
