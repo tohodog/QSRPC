@@ -1,6 +1,7 @@
 package org.song.qsrpc.zk;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import org.song.qsrpc.Message;
 
 /**
  * @author song
@@ -22,15 +23,21 @@ public class NodeInfo {
     private int port;
 
     private String zip;// 压缩 snappy gzip
+    private byte ver = Message.VER;//支持的最新协议版本号
+
     /**
-     * tcp连接通信模式:作为大量并发时的一个配置
-     * false:默认并发发送,可发送超过节点处理极限的qps,大量请求会堆积在服务提供者,默认这个,由服务者来限制qps
-     * true:排队,请求-响应,可作为限流降级,但是大量请求会堆积在请求者等待连接池获取,一样会超时
+     * tcp连接通信模式:作为大量并发时的一个配置:
+     * <p>
+     * False:默认*,nio并发发送,可发送超过节点处理极限的qps,请求会堆积在服务提供者,由服务者来限制qps
+     * <p>
+     * True:排队,请求-响应,可作为自动限流降级,因为服务节点处理完一个请求才会发送下一个请求,配置pool.size即可自动吃满服务节点的性能
+     * 但是请求会堆积在请求者等待连接池获取,一样会超时,可配置pool-whenExhaustedAction抛异常,达到自动限制最高qps效果
+     * 当请求延时大时,pool.size大小将会限制性能发挥,根据情况调整size,默认=core*2
      */
     private boolean queue;
 
-    private int coreThread = Runtime.getRuntime().availableProcessors();//这个决定链接的tcp数量
-    private int weight = 1;
+    private int coreThread = Runtime.getRuntime().availableProcessors() * 2;//这个决定工作线程数量和链接的tcp数量
+    private byte weight = 1;
     private boolean ssl;
 
     public String getZkIps() {
@@ -69,7 +76,7 @@ public class NodeInfo {
 
     public void setIp(String ip) {
         this.ip = ip;
-        mark = null;
+        id = null;
     }
 
     public int getPort() {
@@ -78,7 +85,7 @@ public class NodeInfo {
 
     public void setPort(int port) {
         this.port = port;
-        mark = null;
+        id = null;
     }
 
     public String getZip() {
@@ -87,6 +94,14 @@ public class NodeInfo {
 
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    public byte getVer() {
+        return ver;
+    }
+
+    public void setVer(byte ver) {
+        this.ver = ver;
     }
 
     public boolean isQueue() {
@@ -103,16 +118,14 @@ public class NodeInfo {
 
     public void setCoreThread(int coreThread) {
         this.coreThread = coreThread;
-        mark = null;
     }
 
-    public int getWeight() {
+    public byte getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(byte weight) {
         this.weight = weight;
-        mark = null;
     }
 
     public boolean isSsl() {
@@ -140,10 +153,10 @@ public class NodeInfo {
      * @return IP + ":" + port
      */
     @JSONField(serialize = false)
-    private transient String mark;
+    private transient String id;
 
     public String id() {
-        return mark != null ? mark : (mark = ip + ":" + port + "_" + time);
+        return id != null ? id : (id = ip + ":" + port + "_" + time);
     }
 
     @Override

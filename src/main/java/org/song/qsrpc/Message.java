@@ -12,11 +12,11 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class Message {
 
-    public final static int VER = 0;
+    public final static int VER = 0;// 协议版本目前只有0 ,递增
 
     private int id;
 
-    private byte ver = VER;// 协议版本目前只有0,这个不能手动设置,跟着代码走
+    private byte ver = VER;
 
     private byte zip;// 压缩类型: 0不压缩 1snappy 2gzip
 
