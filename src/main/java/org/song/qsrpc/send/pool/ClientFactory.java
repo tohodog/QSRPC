@@ -4,6 +4,7 @@ import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.send.TCPRouteClient;
+import org.song.qsrpc.zk.NodeInfo;
 
 /**
  * 连接池对象构造工厂
@@ -14,7 +15,7 @@ public class ClientFactory extends BasePoolableObjectFactory {
 
     private String ip;
     private int port;
-    private String zip;
+    private NodeInfo nodeInfo;
 
     /**
      * Creates a new instance of ClientChannelFactory.
@@ -26,16 +27,15 @@ public class ClientFactory extends BasePoolableObjectFactory {
         this(ip, port, null);
     }
 
-    public ClientFactory(String ip, int port, String zip) {
+    public ClientFactory(String ip, int port, NodeInfo nodeInfo) {
         this.ip = ip;
         this.port = port;
-        this.zip = zip;
+        this.nodeInfo = nodeInfo;
     }
 
     @Override
     public Object makeObject() throws Exception {
-
-        TCPRouteClient client = new TCPRouteClient(ip, port, zip);
+        TCPRouteClient client = new TCPRouteClient(ip, port, nodeInfo);
         client.connect();
 
         if (!client.isConnect()) {

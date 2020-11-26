@@ -82,7 +82,7 @@ public class ZookeeperManager {
                     }
                 }
             });
-
+            logger.info("WatchedEvent.getChildren:" + serverList);
             List<byte[]> data = new ArrayList<>();
             for (String server : serverList) {
                 byte[] bytes = zookeeper.getData(rootPath + "/" + server, false, null);

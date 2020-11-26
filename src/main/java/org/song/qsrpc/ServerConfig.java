@@ -25,10 +25,13 @@ public class ServerConfig {
     public final static String KEY_RPC_NODE_ACTION = "qsrpc.node.action";
     public final static String KEY_RPC_NODE_WEIGHT = "qsrpc.node.weight";
     public final static String KEY_RPC_NODE_ZIP = "qsrpc.node.zip";
+    //服务端工作线程数/客户端pool.maxidle
+    public final static String KEY_RPC_NODE_THREAD = "qsrpc.node.thread";
+    //服务端接收消息是否再分发进线程池(解决消息都在同一个tcp发来导致只有一个线程在处理),如果出现服务端吃不满cpu可尝试配置true
+    public final static String KEY_RPC_NODE_REDISTRIBUTE = "qsrpc.node.redistribute";
 
     public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
     public final static String KEY_RPC_MESSAGE_MAXLEN = "qsrpc.message.maxlen";
-
 
     public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
     public final static String KEY_SSL_JKS_PASSWORD = "server.ssl.jks.password";
@@ -39,7 +42,7 @@ public class ServerConfig {
 
     public static final boolean VALUE_LOG;
     public static final int VALUE_MAXLEN;
-
+    public static final boolean VALUE_REDISTRIBUTE;
 
     static {
         properties = new Properties();
@@ -50,6 +53,7 @@ public class ServerConfig {
             e.printStackTrace();
         }
         VALUE_LOG = getBoolean(ServerConfig.KEY_RPC_CFG_LOG);
+        VALUE_REDISTRIBUTE = getBoolean(ServerConfig.KEY_RPC_NODE_REDISTRIBUTE);
         VALUE_MAXLEN = Integer.parseInt(getString(ServerConfig.KEY_RPC_MESSAGE_MAXLEN, 1024 * 1024 * 32 + ""));
     }
 
@@ -57,8 +61,11 @@ public class ServerConfig {
         return Integer.parseInt(getString(key));
     }
 
-    public static long getLong(String key) {
-        return Long.parseLong(getString(key));
+    public static int getInt(String key, int def) {
+        if (containsKey(key))
+            return getInt(key);
+        else
+            return def;
     }
 
     public static boolean getBoolean(String key) {

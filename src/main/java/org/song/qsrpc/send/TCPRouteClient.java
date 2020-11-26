@@ -16,6 +16,7 @@ import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
 import org.song.qsrpc.zip.Zip;
+import org.song.qsrpc.zk.NodeInfo;
 
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +44,7 @@ public class TCPRouteClient {
 
     private String ip;
     private int port;
-    private byte zip;
+    private byte zip, ver;//请求节点的配置
 
     private SslContext sslContext;
 
@@ -59,10 +60,13 @@ public class TCPRouteClient {
         this(ip, port, null);
     }
 
-    public TCPRouteClient(String ip, int port, String zip) {
+    public TCPRouteClient(String ip, int port, NodeInfo nodeInfo) {
         this.ip = ip;
         this.port = port;
-        this.zip = Zip.getInt(zip);
+        if (nodeInfo != null) {
+            this.zip = Zip.getInt(nodeInfo.getZip());
+            this.ver = nodeInfo.getVer();
+        }
     }
 
     public void setSslContext(SslContext sslContext) {
@@ -144,7 +148,11 @@ public class TCPRouteClient {
         if (channel != null)
             return channel.toString();
         else
-            return ip + ":" + port;
+            return getIpPort();
+    }
+
+    public String getIpPort() {
+        return ip + ":" + port;
     }
 
     /**
@@ -157,6 +165,8 @@ public class TCPRouteClient {
     public void sendAsync(Message request, Callback<Message> callback, int timeout) {
         if (isConnect()) {
             request.setZip(zip);
+            request.setVer(ver);
+
             if (timeout <= 0) {//判断大于0,CallbackPool上下文必须有超时remove机制,否则内存泄漏
                 callback.handleError(new RPCException(getClass().getName() + ".sendAsync() timeout must >0 :" + timeout));
                 return;
@@ -188,6 +198,7 @@ public class TCPRouteClient {
     public Message sendSync(Message request, int timeout) throws InterruptedException, RPCException {
         if (isConnect()) {
             request.setZip(zip);
+            request.setVer(ver);
 
             CallFuture<Message> future = CallFuture.newInstance();
             CallbackPool.put(request.getId(), future);

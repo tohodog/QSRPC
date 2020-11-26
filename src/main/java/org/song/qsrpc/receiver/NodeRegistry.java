@@ -40,12 +40,12 @@ public class NodeRegistry {
         nodeInfo.setIp(node_ip);
         nodeInfo.setPort(port);
         if (weight != null) {
-            nodeInfo.setWeight(Integer.parseInt(weight));
+            nodeInfo.setWeight(Byte.parseByte(weight));
         }
         nodeInfo.setZkIps(zkIps);
         nodeInfo.setZkPath(zkPath);
-
-        nodeInfo.setCoreThread(Runtime.getRuntime().availableProcessors());
+        nodeInfo.setCoreThread(ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_THREAD, Runtime.getRuntime().availableProcessors() * 2));
+        nodeInfo.setZip(ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ZIP));
         return nodeInfo;
     }
 

@@ -8,6 +8,7 @@ import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientPool;
+import org.song.qsrpc.statistics.StatisticsManager;
 
 import java.util.concurrent.TimeUnit;
 
@@ -106,7 +107,7 @@ public class RPCClientManager {
                 request.setId(Message.createID());
                 request.setContent(content);
 
-                tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient), timeout);
+                tcpClient.sendAsync(request, new AsyncCallback(callback, clientPool, tcpClient, request), timeout);
                 if (!clientPool.isQueue()) {
                     // 大量请求时,如果这里释放资源,那么请求会全部打出去,堆积在服务端,
                     // 不释放请求就堆积在getResource等待获取资源,都会延时,
@@ -126,17 +127,20 @@ public class RPCClientManager {
         }
     }
 
-    // 包装异步回调,异步释放pool链接
+    // 包装异步回调,异步释放pool链接,统计
     private static class AsyncCallback implements Callback<Message> {
 
         private Callback<byte[]> callback;
         private TCPRouteClient tcpClient;
         private ClientPool clientPool;
+        private String ipport;
 
-        AsyncCallback(Callback<byte[]> callback, ClientPool clientPool, TCPRouteClient tcpClient) {
+        AsyncCallback(Callback<byte[]> callback, ClientPool clientPool, TCPRouteClient tcpClient, Message message) {
             this.callback = callback;
             this.clientPool = clientPool;
             this.tcpClient = tcpClient;
+            ipport = tcpClient.getIpPort();
+            StatisticsManager.getInstance().start(ipport, message);//统计
         }
 
         @Override
@@ -145,6 +149,8 @@ public class RPCClientManager {
                 clientPool.returnResource(tcpClient);
             }
             tcpClient = null;
+
+            StatisticsManager.getInstance().success(ipport, result);//统计
             callback.handleResult(result.getContent());
         }
 
@@ -154,6 +160,8 @@ public class RPCClientManager {
                 clientPool.returnResource(tcpClient);
             }
             tcpClient = null;
+
+            StatisticsManager.getInstance().fail(ipport, error);//统计
             callback.handleError(error);
         }
     }

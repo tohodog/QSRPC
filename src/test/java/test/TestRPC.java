@@ -66,7 +66,7 @@ public class TestRPC extends TestCase {
         nodeInfo2.setAction("order");
         nodeInfo2.setIp("127.0.0.1");
         nodeInfo2.setPort(8848);
-        nodeInfo2.setWeight(2);
+        nodeInfo2.setWeight((byte) 2);
 
         NodeLauncher.start(nodeInfo2, new MessageListener() {
             @Override
