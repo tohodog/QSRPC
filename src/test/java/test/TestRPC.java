@@ -11,6 +11,8 @@ import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.zk.NodeInfo;
 
+import java.util.concurrent.Future;
+
 /**
  * @author song
  * @Email vipqinsong@gmail.com
@@ -107,7 +109,7 @@ public class TestRPC extends TestCase {
         System.out.println("send [order] Done");
 
         //future
-        CallFuture<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
+        Future<byte[]> callFuture = RPCClientManager.getInstance().sendAsync("user", "user".getBytes());
         System.out.println("send [user] FutureResult: " + new String(callFuture.get()));
 
     }

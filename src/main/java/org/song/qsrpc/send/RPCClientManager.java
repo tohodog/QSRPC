@@ -10,7 +10,10 @@ import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.statistics.StatisticsManager;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author song
@@ -63,26 +66,26 @@ public class RPCClientManager {
      * @throws InterruptedException
      * @throws RPCException
      */
-    public byte[] sendSync(String action, byte[] content) throws RPCException, InterruptedException {
+    public byte[] sendSync(String action, byte[] content) throws ExecutionException, InterruptedException, TimeoutException {
         return sendSync(action, content, RpcTimeout);
     }
 
-    public byte[] sendSync(String action, byte[] content, int timeout) throws RPCException, InterruptedException {
-        CallFuture<byte[]> callFuture = sendAsync(action, content, timeout);
+    public byte[] sendSync(String action, byte[] content, int timeout) throws InterruptedException, TimeoutException, ExecutionException {
+        Future<byte[]> callFuture = sendAsync(action, content, timeout);
         return callFuture.get(timeout, TimeUnit.MILLISECONDS);
     }
 
     /**
      * 异步Future
      */
-    public CallFuture<byte[]> sendAsync(String action, byte[] content) {
+    public Future<byte[]> sendAsync(String action, byte[] content) {
         return sendAsync(action, content, RpcTimeout);
     }
 
     /**
      * 异步Future
      */
-    public CallFuture<byte[]> sendAsync(String action, byte[] content, int timeout) {
+    public Future<byte[]> sendAsync(String action, byte[] content, int timeout) {
         CallFuture<byte[]> callback = CallFuture.<byte[]>newInstance();
         sendAsync(action, content, callback, timeout);
         return callback;

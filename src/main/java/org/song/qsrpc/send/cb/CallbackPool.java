@@ -1,13 +1,7 @@
 package org.song.qsrpc.send.cb;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-import org.song.qsrpc.Message;
-import org.song.qsrpc.RPCException;
 
 /**
  * 客户端回调池，用于保存调用发送请求出去的上下文，用于nio异步通信收到服务端响应后回调成功或者失败
@@ -53,9 +47,9 @@ public class CallbackPool {
                 public void run() {
                     TIMEOUT_MAP.remove(requestId);
                     @SuppressWarnings("unchecked")
-                    Callback<Message> cb = (Callback<Message>) CALLBACK_MAP.remove(requestId);
+                    Callback<?> cb = CALLBACK_MAP.remove(requestId);
                     if (cb != null) {
-                        cb.handleError(new RPCException("CallbackPool time out: " + timeout + "ms, id:" + requestId));
+                        cb.handleError(new TimeoutException("CallbackPool time out: " + timeout + "ms, id:" + requestId));
                     }
                 }
             }, timeout, TimeUnit.MILLISECONDS));

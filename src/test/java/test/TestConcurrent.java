@@ -166,9 +166,7 @@ public class TestConcurrent {
                 map.put(request.getId(), System.currentTimeMillis());
                 clientPool.returnResource(tcpClient);
                 return tcpClient.sendSync(request, timeout);
-            } catch (RPCException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
         }
