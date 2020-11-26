@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.github.tohodog</groupId>
     <artifactId>qsrpc</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
 </dependency>
 ```
 
@@ -161,6 +161,11 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 
 
 ## Log
+### v1.1.2(2020-11-26)
+  * 支持根据IP选择指定节点
+  * 池增加驱逐机制 
+  * 优化选择节点性能
+  * 其他优化...
 ### v1.1.1(2020-11-22)
   * Support compress
   * Optimization pool log test...
