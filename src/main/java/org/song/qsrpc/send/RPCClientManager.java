@@ -117,12 +117,12 @@ public class RPCClientManager {
                 if (ServerConfig.VALUE_LOG)
                     logger.info("sendMessage:" + action + ", id:" + request.getId() + ", channel:" + tcpClient.getInfo());
             } else {
-                callback.handleError(new RPCException("can get client from pool:" + action + "," + clientPool));
+                callback.handleError(new RPCException("Can not get client from pool:" + action + "," + clientPool.toString()));
             }
             return true;
         } else {
-            logger.error("can no choose pool:" + action);
-            callback.handleError(new RPCException("can no choose pool:" + action));
+            logger.error("Can no find pool:" + action);
+            callback.handleError(new RPCException("Can not find pool:" + action));
             return false;
         }
     }

@@ -67,4 +67,7 @@ public class ClientFactory extends BasePoolableObjectFactory {
         return false;
     }
 
+    public String getIpPort() {
+        return ip + ":" + port;
+    }
 }

@@ -50,6 +50,10 @@ public class ClientPool extends Pool<TCPRouteClient> {
         return queue;
     }
 
+    public String toString() {
+        return "ClientPool(" + factory.getIpPort() + ")";
+    }
+
     //待验证功能,和预想不一样
     //tcp通信处于非阻塞模式时,不使用连接池,直接new一个使用,可以提高性能,因为少了竞争获取pool操作
     //但这么做需要服务端收到消息再分发出去,高并发时服务端延迟会增大...
