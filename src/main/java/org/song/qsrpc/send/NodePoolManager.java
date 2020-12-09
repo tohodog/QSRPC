@@ -1,19 +1,18 @@
 package org.song.qsrpc.send;
 
-import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.pool.ClientFactory;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
 import org.song.qsrpc.zk.NodeInfo;
 import org.song.qsrpc.zk.ZookeeperManager;
+
+import java.util.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author song
@@ -38,9 +37,9 @@ public class NodePoolManager {
     private Map<String, NodeInfo> ipNodeMap = new HashMap<>();// key: ip:port
 
     public void initNodePool() {
-        String ips = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
-        String path = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
-        if (path == null) path = "/qsrpc";
+        String ips = ServerConfig.RPC_CONFIG.getZkIps();
+        String path = ServerConfig.RPC_CONFIG.getZkPath();
+
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
             //监听节点信息
@@ -188,16 +187,16 @@ public class NodePoolManager {
         //刷新权重映射
         private void initWeight() {
             weightSum = 0;
-            for (NodeInfo nodeInfo : nodeInfos) weightSum += nodeInfo.getWeight();
+            for (NodeInfo nodeInfo : nodeInfos) weightSum += (nodeInfo.getWeight() & 0xff);
             indexMap = new short[weightSum];
 
             short index = 0;
             int offset = 0;
             for (NodeInfo nodeInfo : nodeInfos) {
-                for (int i = 0; i < nodeInfo.getWeight(); i++) {
+                for (int i = 0; i < (nodeInfo.getWeight() & 0xff); i++) {
                     indexMap[i + offset] = index;
                 }
-                offset += nodeInfo.getWeight();
+                offset += (nodeInfo.getWeight() & 0xff);
                 index++;
             }
         }

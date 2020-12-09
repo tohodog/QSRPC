@@ -36,7 +36,7 @@ public class ZookeeperManager {
     }
 
     /**
-     * 链接ZooKeeper,阻塞,超时10s
+     * 链接ZooKeeper,阻塞,超时15s
      */
     private ZooKeeper connectServer() {
         ZooKeeper zk = null;
@@ -54,7 +54,7 @@ public class ZookeeperManager {
                     }
                 }
             });
-            if (latch.await(ZK_SESSION_TIMEOUT * 11 / 10, TimeUnit.MILLISECONDS)) {
+            if (latch.await(ZK_SESSION_TIMEOUT + 500, TimeUnit.MILLISECONDS)) {
                 logger.info("zookeeper conenct server ok");
             } else {
                 logger.error("zookeeper conenct server timeout");

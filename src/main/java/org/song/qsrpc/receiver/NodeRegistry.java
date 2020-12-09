@@ -16,6 +16,18 @@ import org.song.qsrpc.zk.ZookeeperManager;
 public class NodeRegistry {
 
     public static ZookeeperManager registry(NodeInfo nodeInfo) {
+        String zkIps = nodeInfo.getZkIps();
+        String nodeIp = nodeInfo.getIp();
+        int port = nodeInfo.getPort();
+        String[] nodeAction = nodeInfo.getActions();
+
+        //判断不为空
+        if (zkIps == null) throw new NullPointerException(ServerConfig.KEY_RPC_ZK_IPS + " is null");
+        if (nodeIp == null) throw new NullPointerException(ServerConfig.KEY_RPC_NODE_IP + " is null");
+        if (port <= 0 || port > 65535) throw new IllegalStateException(ServerConfig.KEY_RPC_NODE_PORT + " is wrong");
+        if (nodeAction == null || nodeAction.length == 0)
+            throw new NullPointerException(ServerConfig.KEY_RPC_NODE_ACTION + " is null");
+
         ZookeeperManager zookeeperManager = new ZookeeperManager(nodeInfo.getZkIps(), nodeInfo.getZkPath());
         if (zookeeperManager.createChildNode(nodeInfo.id(), JSON.toJSONString(nodeInfo).getBytes())) {
             return zookeeperManager;
@@ -25,27 +37,22 @@ public class NodeRegistry {
     }
 
     public static NodeInfo buildNode() {
-        String zkIps = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
-        String zkPath = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
-        if (zkPath == null) zkPath = "/qsrpc";
+        String zkIps = ServerConfig.RPC_CONFIG.getZkIps();
+        String nodeIp = ServerConfig.RPC_CONFIG.getNodeIp();
+        int port = ServerConfig.RPC_CONFIG.getNodePort();
+        String[] nodeAction = ServerConfig.RPC_CONFIG.getNodeAction();
+        //判断不为空
 
-        String node_ip = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_NODE_IP);
-        int port = Integer.parseInt(ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_NODE_PORT));
-        String node_action = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ACTION);
-        String weight = ServerConfig.getString(ServerConfig.KEY_RPC_NODE_WEIGHT);
         NodeInfo nodeInfo = new NodeInfo();
-        if (node_action != null) {
-            nodeInfo.setActions(node_action.split(","));
-        }
-        nodeInfo.setIp(node_ip);
-        nodeInfo.setPort(port);
-        if (weight != null) {
-            nodeInfo.setWeight(Byte.parseByte(weight));
-        }
         nodeInfo.setZkIps(zkIps);
-        nodeInfo.setZkPath(zkPath);
-        nodeInfo.setCoreThread(ServerConfig.getInt(ServerConfig.KEY_RPC_NODE_THREAD, Runtime.getRuntime().availableProcessors() * 2));
-        nodeInfo.setZip(ServerConfig.getString(ServerConfig.KEY_RPC_NODE_ZIP));
+        nodeInfo.setZkPath(ServerConfig.RPC_CONFIG.getZkPath());
+
+        nodeInfo.setActions(nodeAction);
+        nodeInfo.setIp(nodeIp);
+        nodeInfo.setPort(port);
+        nodeInfo.setWeight((byte) ServerConfig.RPC_CONFIG.getNodeWeight());
+        nodeInfo.setCoreThread(ServerConfig.RPC_CONFIG.getNodeThread());
+        nodeInfo.setZip(ServerConfig.RPC_CONFIG.getNodeZip());
         return nodeInfo;
     }
 

@@ -29,7 +29,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-        if (ServerConfig.VALUE_LOG)
+        if (ServerConfig.RPC_CONFIG.isPrintLog())
             logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
 
         Runnable work = new Runnable() {
@@ -68,7 +68,7 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
         // 1.如果rpc消息是同一个tcp过来的,所以都在同一个线程里处理,需要再分发出去. *但如果满足2,此操作可能会导致高并发延迟变大和上下文切换性能损耗
         // 2.发送端使用pool建立多个tcp链接可解决高并发延迟问题,又保证这边的性能不用再分发了,这个依赖客户端pool
         // 现改为配置设置,用户根据实际调试设置,一般不用改
-        if (ServerConfig.VALUE_REDISTRIBUTE) {
+        if (ServerConfig.RPC_CONFIG.isNodeRedistribute()) {
             workerGroup.execute(work);
         } else {
             work.run();

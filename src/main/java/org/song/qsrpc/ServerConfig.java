@@ -12,8 +12,12 @@ import java.util.Properties;
  * 服务器配置
  */
 public class ServerConfig {
+
     private final static String PROPRETIES_PATH = "/application.properties";
+    private final static Properties properties;
+
     public final static String KEY_RPC_CFG_LOG = "qsrpc.cfg.log";
+    public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
 
     public final static String KEY_RPC_ZK_IPS = "qsrpc.zk.ips";
     public final static String KEY_RPC_ZK_PATH = "qsrpc.zk.path";
@@ -27,34 +31,46 @@ public class ServerConfig {
     public final static String KEY_RPC_NODE_ZIP = "qsrpc.node.zip";
     //服务端工作线程数/客户端pool.maxidle
     public final static String KEY_RPC_NODE_THREAD = "qsrpc.node.thread";
+    public final static String KEY_RPC_MESSAGE_MAXLEN = "qsrpc.message.maxlen";
     //服务端接收消息是否再分发进线程池(解决消息都在同一个tcp发来导致只有一个线程在处理),如果出现服务端吃不满cpu可尝试配置true
     public final static String KEY_RPC_NODE_REDISTRIBUTE = "qsrpc.node.redistribute";
 
-    public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
-    public final static String KEY_RPC_MESSAGE_MAXLEN = "qsrpc.message.maxlen";
-
-    public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
-    public final static String KEY_SSL_JKS_PASSWORD = "server.ssl.jks.password";
-    public final static String KEY_SSL_CERT_PATH = "server.ssl.cert.path";
+//    public final static String KEY_SSL_JKS_PATH = "server.ssl.jks.path";
+//    public final static String KEY_SSL_JKS_PASSWORD = "server.ssl.jks.password";
+//    public final static String KEY_SSL_CERT_PATH = "server.ssl.cert.path";
 
 
-    public final static Properties properties;
-
-    public static final boolean VALUE_LOG;
-    public static final int VALUE_MAXLEN;
-    public static final boolean VALUE_REDISTRIBUTE;
+    public static final RPCConfig RPC_CONFIG = new RPCConfig();
 
     static {
         properties = new Properties();
         try {
             InputStream is = Object.class.getResourceAsStream(PROPRETIES_PATH);
             properties.load(is);
+            RPC_CONFIG.setPrintLog(getBoolean(KEY_RPC_CFG_LOG));
+
+            RPC_CONFIG.setZkIps(getString(KEY_RPC_ZK_IPS));
+            RPC_CONFIG.setZkPath(getString(KEY_RPC_ZK_PATH, "/qsrpc"));
+            RPC_CONFIG.setZkUserName(getString(KEY_RPC_ZK_USERNAME));
+            RPC_CONFIG.setZkPassword(getString(KEY_RPC_ZK_PASSWORD));
+
+            RPC_CONFIG.setClientTimeout(getInt(KEY_RPC_CONNECT_TIMEOUT, 60 * 1000));
+
+            RPC_CONFIG.setNodeIp(getString(KEY_RPC_NODE_IP));
+            RPC_CONFIG.setNodePort(getInt(KEY_RPC_NODE_PORT, 0));
+            String node_action = getString(KEY_RPC_NODE_ACTION);
+            if (node_action != null) {
+                RPC_CONFIG.setNodeAction(node_action.split(","));
+            }
+            RPC_CONFIG.setNodeWeight(getInt(KEY_RPC_NODE_WEIGHT, 1));
+            RPC_CONFIG.setNodeZip(getString(KEY_RPC_NODE_ZIP));
+            RPC_CONFIG.setNodeThread(getInt(KEY_RPC_NODE_THREAD, Runtime.getRuntime().availableProcessors() * 2));
+            RPC_CONFIG.setNodeMaxLen(getInt(KEY_RPC_MESSAGE_MAXLEN, 1024 * 1024 * 16));
+            RPC_CONFIG.setNodeRedistribute(getBoolean(KEY_RPC_NODE_REDISTRIBUTE));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        VALUE_LOG = getBoolean(ServerConfig.KEY_RPC_CFG_LOG);
-        VALUE_REDISTRIBUTE = getBoolean(ServerConfig.KEY_RPC_NODE_REDISTRIBUTE);
-        VALUE_MAXLEN = Integer.parseInt(getString(ServerConfig.KEY_RPC_MESSAGE_MAXLEN, 1024 * 1024 * 32 + ""));
     }
 
     public static int getInt(String key) {
