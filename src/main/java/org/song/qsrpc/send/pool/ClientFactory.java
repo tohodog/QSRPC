@@ -19,18 +19,16 @@ public class ClientFactory extends BasePoolableObjectFactory {
 
     /**
      * Creates a new instance of ClientChannelFactory.
-     *
-     * @param ip
-     * @param port
      */
     public ClientFactory(String ip, int port) {
-        this(ip, port, null);
-    }
-
-    public ClientFactory(String ip, int port, NodeInfo nodeInfo) {
         this.ip = ip;
         this.port = port;
+    }
+
+    public ClientFactory(NodeInfo nodeInfo) {
         this.nodeInfo = nodeInfo;
+        this.ip = nodeInfo.getIp();
+        this.port = nodeInfo.getPort();
     }
 
     @Override

@@ -152,10 +152,12 @@ public class TestConcurrent {
 
     static {
         info.setZip(zip);
+        info.setIp("127.0.0.1");
+        info.setPort(PORT);
         poolConfig.setMaxIdle(DEFAULT_THREAD_POOL_SIZE);
     }
 
-    static ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory("127.0.0.1", PORT, info));//snappy
+    static ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(info));//snappy
 
     //同步
     static Message sendSyncTest(Message request) {

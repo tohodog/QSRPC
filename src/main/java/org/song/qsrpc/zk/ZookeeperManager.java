@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -82,24 +80,29 @@ public class ZookeeperManager {
                     }
                 }
             });
-            logger.info("WatchedEvent.getChildren:" + serverList);
-            List<byte[]> data = new ArrayList<>();
-            for (String server : serverList) {
-                byte[] bytes = zookeeper.getData(rootPath + "/" + server, false, null);
-                data.add(bytes);
-            }
-            this.nodeDatas = data;
-
-            watchNode.onNodeDataChange(data);
-            // logger.info("Service discovery triggered updating connected server node, node
-            // data: {}", dataList);
+            logger.info("WatchNode.serverList:" + serverList);
+//            List<byte[]> data = new ArrayList<>();
+//            for (String server : serverList) {
+//                byte[] bytes = zookeeper.getData(rootPath + "/" + server, false, null);
+//                data.add(bytes);
+//            }
+//            this.nodeDatas = data;
+//            watchNode.onNodeDataChange(data);
+            watchNode.onNodeChange(serverList);
         } catch (Exception e) {
             logger.error("Service discovery failed", e);
         }
     }
 
+
+    public byte[] getNodeData(String server) throws KeeperException, InterruptedException {
+        return zookeeper.getData(rootPath + "/" + server, false, null);
+    }
+
     public interface WatchNode {
-        void onNodeDataChange(List<byte[]> nodeDatas);
+
+        void onNodeChange(List<String> serverList);
+
     }
 
     public List<byte[]> getNodeDatas() {
@@ -114,7 +117,7 @@ public class ZookeeperManager {
         try {
             checkRootNode();
             zookeeper.create(rootPath + "/" + nodeName, datas, acls,
-                    CreateMode.EPHEMERAL_SEQUENTIAL);
+                    CreateMode.EPHEMERAL);
             logger.info("createChildNode->" + nodeName + "=" + new String(datas));
             return true;
         } catch (KeeperException e) {

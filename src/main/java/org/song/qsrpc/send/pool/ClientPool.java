@@ -1,6 +1,7 @@
 package org.song.qsrpc.send.pool;
 
 import org.song.qsrpc.send.TCPRouteClient;
+import org.song.qsrpc.zk.NodeInfo;
 
 /**
  * @author song
@@ -34,16 +35,22 @@ public class ClientPool extends Pool<TCPRouteClient> {
      * 当请求延时大时,pool.size大小将会限制性能发挥,根据情况调整size,默认=core*2
      */
     private boolean queue;//
-    private ClientFactory factory;
+    private NodeInfo nodeInfo;
 
     public ClientPool(PoolConfig poolConfig, ClientFactory factory) {
-        this(poolConfig, factory, false);
+        this(poolConfig, factory, null);
     }
 
-    public ClientPool(PoolConfig poolConfig, ClientFactory factory, boolean queue) {
+    public ClientPool(PoolConfig poolConfig, ClientFactory factory, NodeInfo nodeInfo) {
         super(poolConfig.getPoolConfig(), factory);
-        this.factory = factory;
-        this.queue = queue;
+        if (nodeInfo != null) {
+            this.nodeInfo = nodeInfo;
+            this.queue = nodeInfo.isQueue();
+        }
+    }
+
+    public NodeInfo getNodeInfo() {
+        return nodeInfo;
     }
 
     public boolean isQueue() {
@@ -51,7 +58,7 @@ public class ClientPool extends Pool<TCPRouteClient> {
     }
 
     public String toString() {
-        return "ClientPool(" + factory.getIpPort() + ")";
+        return "ClientPool(" + nodeInfo.id() + ")";
     }
 
     //待验证功能,和预想不一样
