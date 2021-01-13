@@ -67,7 +67,7 @@ public class NodePoolManager {
         });
     }
 
-    private void handleNodeChange(List<String> serverList, List<NodeInfo> nodeDatas) {
+    private void handleNodeChange(final List<String> serverList, List<NodeInfo> nodeDatas) {
         try {
             lock.writeLock().lock();
 

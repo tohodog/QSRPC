@@ -54,6 +54,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
         // 判断已接收内容长度
         if (in.readableBytes() < msgLength) {
             // in.resetReaderIndex();
+            //netty不读取ByteBuf会累加增大,原生ByteBuffer不会
             return;
         }
         // 内容足够了,开始读取
