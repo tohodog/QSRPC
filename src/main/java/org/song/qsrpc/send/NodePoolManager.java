@@ -46,7 +46,9 @@ public class NodePoolManager {
         String nacosServiceNam = ServerConfig.RPC_CONFIG.getNacosServiceName();
         if (nacosAddr != null) {
             initNacos(nacosAddr, nacosServiceNam);
+            return;
         }
+
         String ips = ServerConfig.RPC_CONFIG.getZkIps();
         String path = ServerConfig.RPC_CONFIG.getZkPath();
         if (ips != null) {

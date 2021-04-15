@@ -37,10 +37,10 @@ public class ZookeeperManager {
      * 链接ZooKeeper,阻塞,超时15s
      */
     private ZooKeeper connectServer() {
-        ZooKeeper zk = null;
+        stop();
         final CountDownLatch latch = new CountDownLatch(1);
         try {
-            zk = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
+            zookeeper = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 @Override
                 public void process(WatchedEvent event) {
                     logger.info("WatchedEvent.connectServer:" + event.getState());
@@ -60,7 +60,7 @@ public class ZookeeperManager {
         } catch (Exception e) {
             logger.error("zookeeper conenct server failed", e);
         }
-        return zk;
+        return zookeeper;
     }
 
     private WatchNode watchNode;

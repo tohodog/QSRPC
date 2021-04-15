@@ -8,6 +8,7 @@ import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +38,18 @@ public class NacosManager {
             this.serviceName = "qsrpc";
         else
             this.serviceName = serviceName;
+        connectServer();
+    }
+
+    public boolean connectServer() {
+        stop();
         try {
-            connectServer();
+            namingService = NacosFactory.createNamingService(serverAddr);
         } catch (NacosException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    public NamingService connectServer() throws NacosException {
-        stop();
-        return namingService = NacosFactory.createNamingService(serverAddr);
+        return isConnect();
     }
 
     public boolean register(NodeInfo nodeInfo) {
@@ -73,9 +75,8 @@ public class NacosManager {
         return false;
     }
 
-    public boolean watchNode(final WatchNode watchNode) {
+    public void watchNode(final WatchNode watchNode) {
         this.watchNode = watchNode;
-        if (namingService == null) return false;
         try {
             List<Instance> instances = namingService.getAllInstances(serviceName);
             handleChange(instances, watchNode);
@@ -88,11 +89,11 @@ public class NacosManager {
                     }
                 }
             });
-            return true;
-        } catch (Exception e) {
+            logger.info("subscribe-> " + serviceName);
+        } catch (NacosException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     private void handleChange(List<Instance> instances, final WatchNode watchNode) {
