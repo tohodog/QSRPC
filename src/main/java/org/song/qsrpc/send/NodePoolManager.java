@@ -55,14 +55,8 @@ public class NodePoolManager {
 
     }
 
-    private void initNacos(String nacosAddr, String nacosServiceNam) {
-        nacosManager = new NacosManager(nacosAddr, nacosServiceNam);
-        try {
-            nacosManager.connectServer();
-        } catch (NacosException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+    private void initNacos(String nacosAddr, String nacosServiceName) {
+        nacosManager = new NacosManager(nacosAddr, nacosServiceName);
         nacosManager.watchNode(new NacosManager.WatchNode() {
             @Override
             public void onNodeChange(List<NodeInfo> nodeInfoList) {

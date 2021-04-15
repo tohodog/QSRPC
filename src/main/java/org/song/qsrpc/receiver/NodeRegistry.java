@@ -33,6 +33,9 @@ public class NodeRegistry {
         if (nodeAction == null || nodeAction.length == 0)
             throw new NullPointerException(ServerConfig.KEY_RPC_NODE_ACTION + " is null");
 
+        if (nodeInfo.getName() == null) {
+            nodeInfo.setName("def");
+        }
 
         String nacosAddr = ServerConfig.RPC_CONFIG.getNacosAddr();
         String nacosServiceNam = ServerConfig.RPC_CONFIG.getNacosServiceName();
@@ -58,6 +61,11 @@ public class NodeRegistry {
             public void close() {
                 nacosManager.stop();
             }
+
+            @Override
+            public boolean isConnect() {
+                return nacosManager.isConnect();
+            }
         };
     }
 
@@ -71,12 +79,18 @@ public class NodeRegistry {
             public void close() {
                 zookeeperManager.stop();
             }
+
+            @Override
+            public boolean isConnect() {
+                return zookeeperManager.isConnect();
+            }
         };
     }
 
     public interface CloseFuture {
         void close();
 
+        boolean isConnect();
     }
 
     public static NodeInfo buildNode() {

@@ -41,10 +41,12 @@ public class NacosManager {
             connectServer();
         } catch (NacosException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     public NamingService connectServer() throws NacosException {
+        stop();
         return namingService = NacosFactory.createNamingService(serverAddr);
     }
 
@@ -71,8 +73,9 @@ public class NacosManager {
         return false;
     }
 
-    public void watchNode(final WatchNode watchNode) {
+    public boolean watchNode(final WatchNode watchNode) {
         this.watchNode = watchNode;
+        if (namingService == null) return false;
         try {
             List<Instance> instances = namingService.getAllInstances(serviceName);
             handleChange(instances, watchNode);
@@ -85,9 +88,11 @@ public class NacosManager {
                     }
                 }
             });
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     private void handleChange(List<Instance> instances, final WatchNode watchNode) {
@@ -105,7 +110,7 @@ public class NacosManager {
     }
 
     public boolean isConnect() {
-        return namingService != null;
+        return namingService != null && "UP".equals(namingService.getServerStatus());
     }
 
     public void stop() {
