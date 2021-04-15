@@ -24,6 +24,10 @@ public class ServerConfig {
     public final static String KEY_RPC_ZK_USERNAME = "qsrpc.zk.username";
     public final static String KEY_RPC_ZK_PASSWORD = "qsrpc.zk.password";
 
+    public final static String KEY_RPC_NACOS_ADDR = "qsrpc.nacos.addr";
+    public final static String KEY_RPC_NACOS_SRVNAME = "qsrpc.nacos.srvname";
+
+    public final static String KEY_RPC_NODE_NAME = "qsrpc.node.name";
     public final static String KEY_RPC_NODE_IP = "qsrpc.node.ip";
     public final static String KEY_RPC_NODE_PORT = "qsrpc.node.port";
     public final static String KEY_RPC_NODE_ACTION = "qsrpc.node.action";
@@ -53,9 +57,12 @@ public class ServerConfig {
             RPC_CONFIG.setZkPath(getString(KEY_RPC_ZK_PATH, "/qsrpc"));
             RPC_CONFIG.setZkUserName(getString(KEY_RPC_ZK_USERNAME));
             RPC_CONFIG.setZkPassword(getString(KEY_RPC_ZK_PASSWORD));
+            RPC_CONFIG.setNacosAddr(getString(KEY_RPC_NACOS_ADDR));
+            RPC_CONFIG.setNacosServiceName(getString(KEY_RPC_NACOS_SRVNAME));
 
             RPC_CONFIG.setClientTimeout(getInt(KEY_RPC_CONNECT_TIMEOUT, 60 * 1000));
 
+            RPC_CONFIG.setNodeName(getString(KEY_RPC_NODE_NAME));
             RPC_CONFIG.setNodeIp(getString(KEY_RPC_NODE_IP));
             RPC_CONFIG.setNodePort(getInt(KEY_RPC_NODE_PORT, 0));
             String node_action = getString(KEY_RPC_NODE_ACTION);

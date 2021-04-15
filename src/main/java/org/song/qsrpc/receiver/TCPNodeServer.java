@@ -6,19 +6,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import org.song.qsrpc.Log;
 import org.song.qsrpc.MessageDecoder;
 import org.song.qsrpc.MessageEncoder;
-import org.song.qsrpc.ServerConfig;
-import org.song.qsrpc.zk.NodeInfo;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.Security;
+import org.song.qsrpc.discover.NodeInfo;
 
 public class TCPNodeServer {
 

@@ -16,7 +16,7 @@ import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
 import org.song.qsrpc.zip.Zip;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;

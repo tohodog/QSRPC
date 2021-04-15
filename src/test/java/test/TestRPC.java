@@ -7,9 +7,8 @@ import org.song.qsrpc.receiver.MessageListener;
 import org.song.qsrpc.receiver.NodeLauncher;
 import org.song.qsrpc.receiver.NodeRegistry;
 import org.song.qsrpc.send.RPCClientManager;
-import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 import java.util.concurrent.Future;
 
@@ -63,8 +62,8 @@ public class TestRPC extends TestCase {
 
         //open node server 2
         NodeInfo nodeInfo2 = new NodeInfo();
-        nodeInfo2.setZkIps("127.0.0.1:2181");
-        nodeInfo2.setZkPath("/qsrpc");
+//        nodeInfo2.setZkIps("127.0.0.1:2181");
+//        nodeInfo2.setZkPath("/qsrpc");
         nodeInfo2.setAction("order");
         nodeInfo2.setIp("127.0.0.1");
         nodeInfo2.setPort(8848);
@@ -82,6 +81,8 @@ public class TestRPC extends TestCase {
                 return null;
             }
         });
+
+        Thread.sleep(3000);
 
         //async
         for (int i = 0; i < 9; i++) {

@@ -4,7 +4,7 @@ import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.send.TCPRouteClient;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 /**
  * 连接池对象构造工厂

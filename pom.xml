@@ -60,6 +60,13 @@
                 </exclusions>
             </dependency>
 
+
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>2.0.0-BETA</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -88,6 +95,11 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
         </dependency>
 
         <!--        <dependency>-->

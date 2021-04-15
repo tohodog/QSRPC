@@ -1,4 +1,4 @@
-package org.song.qsrpc.zk;
+package org.song.qsrpc.discover;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import org.song.qsrpc.Message;
@@ -12,16 +12,12 @@ import org.song.qsrpc.Message;
  */
 public class NodeInfo {
 
-    @JSONField(serialize = false)
-    private String zkIps;// zookeeper 主机
-    @JSONField(serialize = false)
-    private String zkPath;// zookeeper 数据路径
 
-    private String[] actions;// 服务器处理功能支持多个,如 user,order
-
+    private String name;// 节点名
     private String ip;// 内网ip/外网IP
     private int port;
 
+    private String[] actions;// 服务器处理功能支持多个,如 user,order
     private String zip;// 压缩 snappy gzip
     private byte ver = Message.VER;//支持的最新协议版本号
 
@@ -40,22 +36,6 @@ public class NodeInfo {
     private byte weight = 1;
     private boolean ssl;
 
-    public String getZkIps() {
-        return zkIps;
-    }
-
-    public void setZkIps(String zkIps) {
-        this.zkIps = zkIps;
-    }
-
-    public String getZkPath() {
-        return zkPath;
-    }
-
-    public void setZkPath(String zkPath) {
-        this.zkPath = zkPath;
-    }
-
 
     public String[] getActions() {
         return actions;
@@ -68,6 +48,14 @@ public class NodeInfo {
     @JSONField(serialize = false)
     public void setAction(String action) {
         this.actions = action.split(",");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getIp() {
@@ -156,7 +144,7 @@ public class NodeInfo {
     private transient String id;
 
     public String id() {
-        return id != null ? id : (id = ip + ":" + port + "_" + time);
+        return id != null ? id : (id = ip + ":" + port + "_" + name + "_" + time);
     }
 
     @Override

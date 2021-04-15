@@ -30,6 +30,20 @@ public class RPCConfig {
      */
     private String zkPassword;
 
+    /**
+     * nacos 服务地址多个,隔开
+     */
+    private String nacosAddr;
+    /**
+     * nacos 服务发现名
+     */
+    private String nacosServiceName;
+
+    /**
+     * 项目名
+     */
+    private String nodeName;
+
 
     /**
      * 客户端 请求超时
@@ -105,6 +119,30 @@ public class RPCConfig {
 
     public void setZkUserName(String zkUserName) {
         this.zkUserName = zkUserName;
+    }
+
+    public String getNacosAddr() {
+        return nacosAddr;
+    }
+
+    public void setNacosAddr(String nacosAddr) {
+        this.nacosAddr = nacosAddr;
+    }
+
+    public String getNacosServiceName() {
+        return nacosServiceName;
+    }
+
+    public void setNacosServiceName(String nacosServiceName) {
+        this.nacosServiceName = nacosServiceName;
+    }
+
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     public String getZkPassword() {

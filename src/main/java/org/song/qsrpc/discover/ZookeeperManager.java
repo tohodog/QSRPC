@@ -1,4 +1,4 @@
-package org.song.qsrpc.zk;
+package org.song.qsrpc.discover;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
@@ -99,12 +99,6 @@ public class ZookeeperManager {
         return zookeeper.getData(rootPath + "/" + server, false, null);
     }
 
-    public interface WatchNode {
-
-        void onNodeChange(List<String> serverList);
-
-    }
-
     public List<byte[]> getNodeDatas() {
         return nodeDatas;
     }
@@ -164,7 +158,7 @@ public class ZookeeperManager {
         }
     }
 
-    private boolean isConnect() {
+    public boolean isConnect() {
         return zookeeper.getState() == ZooKeeper.States.CONNECTED;
     }
 
@@ -176,5 +170,11 @@ public class ZookeeperManager {
                 logger.error("zookeeper stop failed", e);
             }
         }
+    }
+
+    public interface WatchNode {
+
+        void onNodeChange(List<String> serverList);
+
     }
 }

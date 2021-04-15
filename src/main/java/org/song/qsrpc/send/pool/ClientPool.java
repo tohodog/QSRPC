@@ -1,7 +1,7 @@
 package org.song.qsrpc.send.pool;
 
 import org.song.qsrpc.send.TCPRouteClient;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 /**
  * @author song
