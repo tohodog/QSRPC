@@ -50,7 +50,7 @@ public class ServerConfig {
         properties = new Properties();
         try {
             InputStream is = Object.class.getResourceAsStream(PROPRETIES_PATH);
-            properties.load(is);
+            if (is != null) properties.load(is);
             RPC_CONFIG.setPrintLog(getBoolean(KEY_RPC_CFG_LOG));
 
             RPC_CONFIG.setZkIps(getString(KEY_RPC_ZK_IPS));
