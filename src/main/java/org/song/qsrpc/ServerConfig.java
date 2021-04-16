@@ -1,5 +1,7 @@
 package org.song.qsrpc;
 
+import com.alibaba.fastjson.JSON;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -75,6 +77,7 @@ public class ServerConfig {
             RPC_CONFIG.setNodeMaxLen(getInt(KEY_RPC_MESSAGE_MAXLEN, 1024 * 1024 * 16));
             RPC_CONFIG.setNodeRedistribute(getBoolean(KEY_RPC_NODE_REDISTRIBUTE));
 
+            Log.i("RPC_CONFIG:" + JSON.toJSONString(RPC_CONFIG));
         } catch (IOException e) {
             e.printStackTrace();
         }
