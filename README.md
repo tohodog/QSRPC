@@ -2,14 +2,14 @@
 <br/>
 <br/>
 ---
-一个基于zookeeper自动注册扩展服务、使用netty长连接池的高性能轻量级RPC框架
+一个基于nacos/zookeeper自动注册扩展服务、使用netty长连接池的高性能轻量级RPC框架
 <br/>
 
-[![netty][nettysvg]][netty] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
+[![netty][nettysvg]][netty] [![nacos][nacossvg]][nacos] [![zk][zksvg]][zk]  [![License][licensesvg]][license]
 
-  * 使用zookeeper服务发现,自动注册扩展服务
+  * 使用nacos/zookeeper服务发现,自动注册扩展服务
   * 使用长连接TCP池,netty作为网络IO,支持全双工通信,高性能
-  * 消息发送支持异步/同步,NIO
+  * 消息发送支持异步/同步
   * 自动选择符合action节点服务器,支持权重分发消息
   * 支持snappy,gzip压缩
   * 可进行二次封装开发,[远程调用][qsrpc-starter],消息路由负载均衡等等
@@ -21,15 +21,22 @@
 <dependency>
     <groupId>com.github.tohodog</groupId>
     <artifactId>qsrpc</artifactId>
-    <version>1.1.2</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 ## Demo
-First configured [zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
+First configured 
+[nacos](https://nacos.io/zh-cn/docs/deployment.html)
+/
+[zookeeper](http://mirrors.hust.edu.cn/apache/zookeeper/)
 
 ### application.properties
 ```
+#nacos
+qsrpc.nacos.addr=192.168.0.100:6666
+qsrpc.nacos.srvname=qsrpc
+
 #zookeeper
 qsrpc.zk.ips=127.0.0.1:2181
 qsrpc.zk.path=/qsrpc
@@ -120,7 +127,7 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 在4核自发自收的情况下有12万+的并发数,实际会更高 [测试截图1][testpng] [测试截图2][testpng2]
 
 ## Future
-  * Support nacos...
+  * ~~Support nacos...~~
   * AIO...
   
 
@@ -161,6 +168,11 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 
 
 ## Log
+### v1.2.0(2021-04-16)
+  * 支持Nacos 2.0
+  * 优化zk服务发现性能 
+  * 支持代码配置参数
+  * 其他优化...
 ### v1.1.2(2020-11-26)
   * 支持根据IP选择指定节点
   * 池增加驱逐机制 
@@ -193,7 +205,11 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 [nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
 [netty]: https://github.com/netty/netty
 
-[zksvg]: https://img.shields.io/badge/zookeeper-3.4.14-blue.svg
+[nacossvg]: https://img.shields.io/badge/nacos-2.0.0-2EBBFB.svg
+[nacos]: https://github.com/alibaba/nacos
+
+
+[zksvg]: https://img.shields.io/badge/zookeeper-3.4.14-FF9900.svg
 [zk]: https://github.com/apache/zookeeper
 
 [licensesvg]: https://img.shields.io/badge/License-Apache--2.0-red.svg
