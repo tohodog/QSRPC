@@ -34,25 +34,25 @@ First configured
 ### application.properties
 ```
 #nacos
-qsrpc.nacos.addr=192.168.0.100:6666
-qsrpc.nacos.srvname=qsrpc
+qsrpc.nacos.addr=192.168.0.100:8848
+#qsrpc.nacos.srvname=qsrpc
 
 #zookeeper
-qsrpc.zk.ips=127.0.0.1:2181
-qsrpc.zk.path=/qsrpc
+#qsrpc.zk.ips=127.0.0.1:2181
+#qsrpc.zk.path=/qsrpc
 
 #node server
 qsrpc.node.ip=127.0.0.1
 qsrpc.node.port=19980
 qsrpc.node.action=user,order
 qsrpc.node.weight=1
-qsrpc.node.zip=snappy/gzip
+#qsrpc.node.zip=snappy/gzip
 ```
 
 ### Node
 ```
-    //open node server 1
-    NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
+    //open node server 1 (read application.properties)
+    NodeInfo nodeInfo = NodeRegistry.buildNode();
     //sync callback
     NodeLauncher.start(nodeInfo, new MessageListener() {
         @Override
@@ -61,10 +61,13 @@ qsrpc.node.zip=snappy/gzip
         }
     });
 
-    //open node server 2
+
+    // open node server 2
+    ServerConfig.RPC_CONFIG.setNacosAddr("192.168.0.100:8848");
+    ServerConfig.RPC_CONFIG.setNacosServiceName("qsrpc");
+    // ServerConfig.RPC_CONFIG.setZkIps("127.0.0.1:2181");
+    // ServerConfig.RPC_CONFIG.setZkPath("/qsrpc");
     NodeInfo nodeInfo2 = new NodeInfo();
-    nodeInfo2.setZkIps("127.0.0.1:2181");//zookeeper ip
-    nodeInfo2.setZkPath("/qsrpc");//zookeeper path
     nodeInfo2.setAction("order");//node server action
     nodeInfo2.setIp("127.0.0.1");//node server ip
     nodeInfo2.setPort(8848);//nodeserver port

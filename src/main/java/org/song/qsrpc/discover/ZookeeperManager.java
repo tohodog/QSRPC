@@ -22,12 +22,13 @@ public class ZookeeperManager {
 
     private volatile List<byte[]> nodeDatas = new ArrayList<>();
 
-    private String registryAddress;// IP列表
+    private final String registryAddress;// IP列表
+    private final String rootPath;
+
     private ZooKeeper zookeeper;
 
-    private String rootPath;
-
     public ZookeeperManager(String registryAddress, String rootPath) {
+        if (rootPath == null) rootPath = "/qsrpc";
         this.registryAddress = registryAddress;
         this.rootPath = rootPath;
         zookeeper = connectServer();
@@ -131,7 +132,7 @@ public class ZookeeperManager {
             String[] arr = rootPath.split("/");
             String path = "";
             for (String s : arr) {
-                if (s.isEmpty()) continue;
+                if (s == null || s.isEmpty()) continue;
                 path += "/" + s;
                 Stat stat = zookeeper.exists(path, false);
                 if (stat == null) {
