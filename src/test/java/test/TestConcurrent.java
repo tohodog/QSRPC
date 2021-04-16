@@ -2,17 +2,14 @@ package test;
 
 import org.song.qsrpc.Log;
 import org.song.qsrpc.Message;
-import org.song.qsrpc.RPCException;
-import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.receiver.MessageListener;
-import org.song.qsrpc.receiver.NodeRegistry;
 import org.song.qsrpc.receiver.TCPNodeServer;
 import org.song.qsrpc.send.TCPRouteClient;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.pool.ClientFactory;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 import java.io.IOException;
 import java.util.Map;
@@ -152,10 +149,12 @@ public class TestConcurrent {
 
     static {
         info.setZip(zip);
+        info.setIp("127.0.0.1");
+        info.setPort(PORT);
         poolConfig.setMaxIdle(DEFAULT_THREAD_POOL_SIZE);
     }
 
-    static ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory("127.0.0.1", PORT, info));//snappy
+    static ClientPool clientPool = new ClientPool(poolConfig, new ClientFactory(info));//snappy
 
     //同步
     static Message sendSyncTest(Message request) {
@@ -166,9 +165,7 @@ public class TestConcurrent {
                 map.put(request.getId(), System.currentTimeMillis());
                 clientPool.returnResource(tcpClient);
                 return tcpClient.sendSync(request, timeout);
-            } catch (RPCException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
         }

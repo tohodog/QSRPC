@@ -1,19 +1,20 @@
 package org.song.qsrpc.send;
 
-import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.nacos.api.exception.NacosException;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.pool.ClientFactory;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
-import org.song.qsrpc.zk.NodeInfo;
-import org.song.qsrpc.zk.ZookeeperManager;
+import org.song.qsrpc.discover.NacosManager;
+import org.song.qsrpc.discover.NodeInfo;
+import org.song.qsrpc.discover.ZookeeperManager;
+
+import java.util.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author song
@@ -29,61 +30,97 @@ public class NodePoolManager {
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     private ZookeeperManager zookeeperManager;
+    private NacosManager nacosManager;
+
 
     // 所有节点的连接池
-    private Map<String, ClientPool> clientPoolMap = new HashMap<>();// key:节点唯一标识
+    private Map<String, ClientPool> clientPoolMap = new HashMap<>();// key:节点唯一标识/服务名(IP:PROT_TIME)
 
     // 按action分组的节点
     private Map<String, ActionNodeContext> actionNodeContextMap = new HashMap<>();// key:action
     private Map<String, NodeInfo> ipNodeMap = new HashMap<>();// key: ip:port
 
     public void initNodePool() {
-        String ips = ServerConfig.getStringNotnull(ServerConfig.KEY_RPC_ZK_IPS);
-        String path = ServerConfig.getString(ServerConfig.KEY_RPC_ZK_PATH);
-        if (path == null) path = "/qsrpc";
+
+        String nacosAddr = ServerConfig.RPC_CONFIG.getNacosAddr();
+        String nacosServiceNam = ServerConfig.RPC_CONFIG.getNacosServiceName();
+        if (nacosAddr != null) {
+            initNacos(nacosAddr, nacosServiceNam);
+            return;
+        }
+
+        String ips = ServerConfig.RPC_CONFIG.getZkIps();
+        String path = ServerConfig.RPC_CONFIG.getZkPath();
+        if (ips != null) {
+            initZK(ips, path);
+        }
+
+    }
+
+    private void initNacos(String nacosAddr, String nacosServiceName) {
+        nacosManager = new NacosManager(nacosAddr, nacosServiceName);
+        nacosManager.watchNode(new NacosManager.WatchNode() {
+            @Override
+            public void onNodeChange(List<NodeInfo> nodeInfoList) {
+                List<String> serverList = new ArrayList<>();
+                //新增的服务节点
+                List<NodeInfo> newNodeInfos = new ArrayList<>();
+                for (NodeInfo nodeInfo : nodeInfoList) {
+                    serverList.add(nodeInfo.id());
+                    if (!clientPoolMap.containsKey(nodeInfo.id())) {
+                        logger.info("addNode->" + JSON.toJSONString(nodeInfo));
+                        newNodeInfos.add(nodeInfo);
+                    }
+                }
+                handleNodeChange(serverList, newNodeInfos);
+            }
+        });
+    }
+
+    private void initZK(String ips, String path) {
+        if (zookeeperManager != null) zookeeperManager.stop();
         zookeeperManager = new ZookeeperManager(ips, path);
         zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
             //监听节点信息
             @Override
-            public void onNodeDataChange(List<byte[]> nodeDatas) {
+            public void onNodeChange(List<String> serverList) {
                 try {
-                    List<NodeInfo> nodeInfos = new ArrayList<>();
-                    for (byte[] bytes : nodeDatas) {
-                        try {
-                            NodeInfo nodeInfo = JSON.parseObject(new String(bytes), NodeInfo.class);
-                            if (nodeInfo != null) nodeInfos.add(nodeInfo);
-                        } catch (Exception e) {
-                            logger.error("onNodeDataChange.parseObject", e);
+                    //新增的服务节点
+                    List<NodeInfo> newNodeInfos = new ArrayList<>();
+                    for (String server : serverList) {
+                        if (!clientPoolMap.containsKey(server)) {
+                            String nodeData = new String(zookeeperManager.getNodeData(server));
+                            NodeInfo nodeInfo = JSON.parseObject(nodeData, NodeInfo.class);
+                            logger.info("addNode->" + JSON.toJSONString(nodeInfo));
+                            if (nodeInfo != null && nodeInfo.getIp() != null) newNodeInfos.add(nodeInfo);
                         }
                     }
-                    logger.info("onNodeDataChange->" + nodeInfos.size() + "=" + JSON.toJSONString(nodeInfos));
-                    onNodeChange(nodeInfos);
+                    handleNodeChange(serverList, newNodeInfos);
                 } catch (Exception e) {
-                    logger.error("onNodeDataChange.ERROR", e);
+                    logger.error("onNodeChange.ERROR", e);
                 }
             }
         });
     }
 
-    private void onNodeChange(List<NodeInfo> nodeDatas) {
+    private void handleNodeChange(final List<String> serverList, List<NodeInfo> nodeDatas) {
         try {
             lock.writeLock().lock();
 
             // 新建新的节点连接池
-            Set<String> newNodeSet = new HashSet<>();
             for (NodeInfo nodeInfo : nodeDatas) {
                 String id = nodeInfo.id();
-                newNodeSet.add(id);
                 if (!clientPoolMap.containsKey(id)) {
                     clientPoolMap.put(nodeInfo.id(), buildClientPool(nodeInfo));
                     logger.info("createClientPool:" + id);
                 }
             }
+
             // 移除不存在节点连接池
             Iterator<String> iterator = clientPoolMap.keySet().iterator();
             while (iterator.hasNext()) {
                 String id = iterator.next();
-                if (!newNodeSet.contains(id)) {
+                if (!serverList.contains(id)) {
                     ClientPool clientPool = clientPoolMap.get(id);
                     clientPool.destroy();
                     iterator.remove();
@@ -94,7 +131,9 @@ public class NodePoolManager {
             actionNodeContextMap.clear();
             ipNodeMap.clear();
             // 把节点按action分组,也就是同样服务功能的服务器放一起
-            for (NodeInfo nodeInfo : nodeDatas) {
+            Iterator<Map.Entry<String, ClientPool>> iterator2 = clientPoolMap.entrySet().iterator();
+            while (iterator2.hasNext()) {
+                NodeInfo nodeInfo = iterator2.next().getValue().getNodeInfo();
                 ipNodeMap.put(nodeInfo.getIp() + ":" + nodeInfo.getPort(), nodeInfo);///按ip映射
                 String[] actions = nodeInfo.getActions();
                 for (String action : actions) {
@@ -111,11 +150,12 @@ public class NodePoolManager {
             for (Map.Entry<String, ActionNodeContext> e : actionNodeContextMap.entrySet()) {
                 e.getValue().initWeight();
             }
+
         } finally {
             lock.writeLock().unlock();
         }
-
     }
+
 
     // 根据action/ip选择服务器,支持权重
     public ClientPool chooseClientPool(String action) {
@@ -147,9 +187,7 @@ public class NodePoolManager {
         if (nodeInfo.isQueue())//请求-响应模式,pool.get()不进行等待,因为会自动吃满qps,没有空闲对象抛异常可以保证请求延时小
             poolConfig.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL);
 
-        return new ClientPool(poolConfig,
-                new ClientFactory(nodeInfo.getIp(), nodeInfo.getPort(), nodeInfo),
-                nodeInfo.isQueue());
+        return new ClientPool(poolConfig, new ClientFactory(nodeInfo), nodeInfo);
     }
 
     // 某个action节点组请求统计,方便扩展功能
@@ -188,16 +226,16 @@ public class NodePoolManager {
         //刷新权重映射
         private void initWeight() {
             weightSum = 0;
-            for (NodeInfo nodeInfo : nodeInfos) weightSum += nodeInfo.getWeight();
+            for (NodeInfo nodeInfo : nodeInfos) weightSum += (nodeInfo.getWeight() & 0xff);
             indexMap = new short[weightSum];
 
             short index = 0;
             int offset = 0;
             for (NodeInfo nodeInfo : nodeInfos) {
-                for (int i = 0; i < nodeInfo.getWeight(); i++) {
+                for (int i = 0; i < (nodeInfo.getWeight() & 0xff); i++) {
                     indexMap[i + offset] = index;
                 }
-                offset += nodeInfo.getWeight();
+                offset += (nodeInfo.getWeight() & 0xff);
                 index++;
             }
         }

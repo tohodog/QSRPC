@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
  * 服务器日记
  */
 public class Log {
-    public static Logger LOGGER = LoggerFactory.getLogger("QSRPC");
+
+    private static Logger LOGGER = LoggerFactory.getLogger("QSRPC");
 
     public static void e(Object msg) {
         LOGGER.error(String.valueOf(msg));

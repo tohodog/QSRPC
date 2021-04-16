@@ -16,9 +16,11 @@ import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
 import org.song.qsrpc.zip.Zip;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author song
@@ -186,7 +188,7 @@ public class TCPRouteClient {
      * @param timeout CallbackPool上下文必须有超时remove机制,否则内存泄漏
      * @return CallFuture<Message>
      */
-    public CallFuture<Message> sendAsync(Message request, int timeout) {
+    public java.util.concurrent.Future<Message> sendAsync(Message request, int timeout) {
         CallFuture<Message> future = CallFuture.newInstance();
         sendAsync(request, future, timeout);
         return future;
@@ -195,7 +197,7 @@ public class TCPRouteClient {
     /**
      * 同步,返回响应信息 路由不建议用,访问延迟大将会导致线程挂起太久,CPU无法跑满,而解决方法只有新建更多线程,性能不好
      */
-    public Message sendSync(Message request, int timeout) throws InterruptedException, RPCException {
+    public Message sendSync(Message request, int timeout) throws InterruptedException, TimeoutException, ExecutionException {
         if (isConnect()) {
             request.setZip(zip);
             request.setVer(ver);

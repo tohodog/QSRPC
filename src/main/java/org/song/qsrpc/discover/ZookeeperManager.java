@@ -1,4 +1,4 @@
-package org.song.qsrpc.zk;
+package org.song.qsrpc.discover;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -24,25 +22,26 @@ public class ZookeeperManager {
 
     private volatile List<byte[]> nodeDatas = new ArrayList<>();
 
-    private String registryAddress;// IP列表
+    private final String registryAddress;// IP列表
+    private final String rootPath;
+
     private ZooKeeper zookeeper;
 
-    private String rootPath;
-
     public ZookeeperManager(String registryAddress, String rootPath) {
+        if (rootPath == null) rootPath = "/qsrpc";
         this.registryAddress = registryAddress;
         this.rootPath = rootPath;
         zookeeper = connectServer();
     }
 
     /**
-     * 链接ZooKeeper,阻塞,超时10s
+     * 链接ZooKeeper,阻塞,超时15s
      */
     private ZooKeeper connectServer() {
-        ZooKeeper zk = null;
+        stop();
         final CountDownLatch latch = new CountDownLatch(1);
         try {
-            zk = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
+            zookeeper = new ZooKeeper(registryAddress, ZK_SESSION_TIMEOUT, new Watcher() {
                 @Override
                 public void process(WatchedEvent event) {
                     logger.info("WatchedEvent.connectServer:" + event.getState());
@@ -54,7 +53,7 @@ public class ZookeeperManager {
                     }
                 }
             });
-            if (latch.await(ZK_SESSION_TIMEOUT * 11 / 10, TimeUnit.MILLISECONDS)) {
+            if (latch.await(ZK_SESSION_TIMEOUT + 500, TimeUnit.MILLISECONDS)) {
                 logger.info("zookeeper conenct server ok");
             } else {
                 logger.error("zookeeper conenct server timeout");
@@ -62,7 +61,7 @@ public class ZookeeperManager {
         } catch (Exception e) {
             logger.error("zookeeper conenct server failed", e);
         }
-        return zk;
+        return zookeeper;
     }
 
     private WatchNode watchNode;
@@ -82,24 +81,23 @@ public class ZookeeperManager {
                     }
                 }
             });
-            logger.info("WatchedEvent.getChildren:" + serverList);
-            List<byte[]> data = new ArrayList<>();
-            for (String server : serverList) {
-                byte[] bytes = zookeeper.getData(rootPath + "/" + server, false, null);
-                data.add(bytes);
-            }
-            this.nodeDatas = data;
-
-            watchNode.onNodeDataChange(data);
-            // logger.info("Service discovery triggered updating connected server node, node
-            // data: {}", dataList);
+            logger.info("WatchNode.serverList:" + serverList);
+//            List<byte[]> data = new ArrayList<>();
+//            for (String server : serverList) {
+//                byte[] bytes = zookeeper.getData(rootPath + "/" + server, false, null);
+//                data.add(bytes);
+//            }
+//            this.nodeDatas = data;
+//            watchNode.onNodeDataChange(data);
+            watchNode.onNodeChange(serverList);
         } catch (Exception e) {
             logger.error("Service discovery failed", e);
         }
     }
 
-    public interface WatchNode {
-        void onNodeDataChange(List<byte[]> nodeDatas);
+
+    public byte[] getNodeData(String server) throws KeeperException, InterruptedException {
+        return zookeeper.getData(rootPath + "/" + server, false, null);
     }
 
     public List<byte[]> getNodeDatas() {
@@ -114,7 +112,7 @@ public class ZookeeperManager {
         try {
             checkRootNode();
             zookeeper.create(rootPath + "/" + nodeName, datas, acls,
-                    CreateMode.EPHEMERAL_SEQUENTIAL);
+                    CreateMode.EPHEMERAL);
             logger.info("createChildNode->" + nodeName + "=" + new String(datas));
             return true;
         } catch (KeeperException e) {
@@ -134,7 +132,7 @@ public class ZookeeperManager {
             String[] arr = rootPath.split("/");
             String path = "";
             for (String s : arr) {
-                if (s.isEmpty()) continue;
+                if (s == null || s.isEmpty()) continue;
                 path += "/" + s;
                 Stat stat = zookeeper.exists(path, false);
                 if (stat == null) {
@@ -161,7 +159,7 @@ public class ZookeeperManager {
         }
     }
 
-    private boolean isConnect() {
+    public boolean isConnect() {
         return zookeeper.getState() == ZooKeeper.States.CONNECTED;
     }
 
@@ -173,5 +171,11 @@ public class ZookeeperManager {
                 logger.error("zookeeper stop failed", e);
             }
         }
+    }
+
+    public interface WatchNode {
+
+        void onNodeChange(List<String> serverList);
+
     }
 }

@@ -6,3 +6,4 @@ local.properties
 /logs
 /target
 /**/*.properties
+logback.xml

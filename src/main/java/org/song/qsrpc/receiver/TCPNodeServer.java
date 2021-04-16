@@ -6,19 +6,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import org.song.qsrpc.Log;
 import org.song.qsrpc.MessageDecoder;
 import org.song.qsrpc.MessageEncoder;
-import org.song.qsrpc.ServerConfig;
-import org.song.qsrpc.zk.NodeInfo;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.Security;
+import org.song.qsrpc.discover.NodeInfo;
 
 public class TCPNodeServer {
 
@@ -116,47 +107,47 @@ public class TCPNodeServer {
     }
 
 
-    public static SslContext getSslContext() throws Exception {
-        if (!ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PATH)) {
-            return null;
-        }
-        File jks = new File(ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PATH));
-
-        // 客户端证书,也可以放在jks里
-        File cert = null;
-        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_CERT_PATH)) {
-            cert = new File(ServerConfig.getString(ServerConfig.KEY_SSL_CERT_PATH));
-        }
-
-        String keystorePassword = null;
-        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PASSWORD))
-            keystorePassword = ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD);
-
-        return SslContextBuilder.forServer(cert, jks, keystorePassword).build();
-    }
-
-    public static SSLContext getSSLContext() throws Exception {
-        if (!ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PATH)) {
-            return null;
-        }
-
-        char[] keystorePassword = null;
-        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PASSWORD))
-            keystorePassword = ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD).toCharArray();
-
-        String algorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm");
-        if (algorithm == null) {
-            algorithm = "SunX509";
-        }
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD)), keystorePassword);
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-        kmf.init(ks, keystorePassword);
-
-        SSLContext serverContext = SSLContext.getInstance("SSLv3");
-        serverContext.init(kmf.getKeyManagers(), null, null);
-
-        return serverContext;
-    }
+//    public static SslContext getSslContext() throws Exception {
+//        if (!ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PATH)) {
+//            return null;
+//        }
+//        File jks = new File(ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PATH));
+//
+//        // 客户端证书,也可以放在jks里
+//        File cert = null;
+//        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_CERT_PATH)) {
+//            cert = new File(ServerConfig.getString(ServerConfig.KEY_SSL_CERT_PATH));
+//        }
+//
+//        String keystorePassword = null;
+//        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PASSWORD))
+//            keystorePassword = ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD);
+//
+//        return SslContextBuilder.forServer(cert, jks, keystorePassword).build();
+//    }
+//
+//    public static SSLContext getSSLContext() throws Exception {
+//        if (!ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PATH)) {
+//            return null;
+//        }
+//
+//        char[] keystorePassword = null;
+//        if (ServerConfig.containsKey(ServerConfig.KEY_SSL_JKS_PASSWORD))
+//            keystorePassword = ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD).toCharArray();
+//
+//        String algorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm");
+//        if (algorithm == null) {
+//            algorithm = "SunX509";
+//        }
+//        KeyStore ks = KeyStore.getInstance("JKS");
+//        ks.load(new FileInputStream(ServerConfig.getString(ServerConfig.KEY_SSL_JKS_PASSWORD)), keystorePassword);
+//        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
+//        kmf.init(ks, keystorePassword);
+//
+//        SSLContext serverContext = SSLContext.getInstance("SSLv3");
+//        serverContext.init(kmf.getKeyManagers(), null, null);
+//
+//        return serverContext;
+//    }
 
 }

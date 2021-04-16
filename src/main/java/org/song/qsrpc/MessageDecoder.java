@@ -24,7 +24,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageDecoder.class);
 
-    public static final int MAX_LEN = ServerConfig.VALUE_MAXLEN + 10;
+    private final int MAX_LEN = ServerConfig.RPC_CONFIG.getNodeMaxLen() + 8;
 
     private Message message;
     private int msgLength;
@@ -41,8 +41,8 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
         if (message == null) {
             msgLength = in.readInt();
-            if (msgLength < 8 || msgLength > MAX_LEN) {// 传输出错了,错位
-                logger.error("decode-len_err(" + ctx + ")-len:" + msgLength);
+            if (msgLength < 8 || msgLength > MAX_LEN) {// 传输出错了,错位/超出限制
+                logger.error("decode-len_err(" + ctx + ")-len:" + msgLength + ", max:" + MAX_LEN);
                 init();
                 ctx.close();
                 return;
@@ -54,6 +54,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
         // 判断已接收内容长度
         if (in.readableBytes() < msgLength) {
             // in.resetReaderIndex();
+            //netty不读取ByteBuf会累加增大,原生ByteBuffer不会
             return;
         }
         // 内容足够了,开始读取
