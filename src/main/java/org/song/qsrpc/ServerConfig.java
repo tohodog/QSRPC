@@ -58,7 +58,7 @@ public class ServerConfig {
             RPC_CONFIG.setZkUserName(getString(KEY_RPC_ZK_USERNAME));
             RPC_CONFIG.setZkPassword(getString(KEY_RPC_ZK_PASSWORD));
             RPC_CONFIG.setNacosAddr(getString(KEY_RPC_NACOS_ADDR));
-            RPC_CONFIG.setNacosServiceName(getString(KEY_RPC_NACOS_SRVNAME));
+            RPC_CONFIG.setNacosServiceName(getString(KEY_RPC_NACOS_SRVNAME, "qsrpc"));
 
             RPC_CONFIG.setClientTimeout(getInt(KEY_RPC_CONNECT_TIMEOUT, 60 * 1000));
 
