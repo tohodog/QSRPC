@@ -45,7 +45,7 @@ qsrpc.nacos.addr=192.168.0.100:8848
 qsrpc.node.ip=127.0.0.1
 qsrpc.node.port=19980
 qsrpc.node.action=user,order
-qsrpc.node.weight=1
+#qsrpc.node.weight=1
 #qsrpc.node.zip=snappy/gzip
 ```
 
