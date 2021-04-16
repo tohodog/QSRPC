@@ -1,7 +1,7 @@
 package org.song.qsrpc.receiver;
 
-import org.song.qsrpc.zk.NodeInfo;
-import org.song.qsrpc.zk.ZookeeperManager;
+import org.song.qsrpc.RPCException;
+import org.song.qsrpc.discover.NodeInfo;
 
 public class NodeLauncher {
 
@@ -12,26 +12,25 @@ public class NodeLauncher {
     public static NodeContext start(final NodeInfo nodeInfo, final MessageListener messageListener) {
         final TCPNodeServer tcpNodeServer = new TCPNodeServer(nodeInfo, messageListener);
         boolean node = tcpNodeServer.start();
-        ZookeeperManager zk = null;
+        NodeRegistry.CloseFuture closeFuture = null;
         if (node) {
             //注册节点信息
-            zk = NodeRegistry.registry(nodeInfo);
-            if (zk == null) {
-                tcpNodeServer.close();
-            }
+            closeFuture = NodeRegistry.registry(nodeInfo);
+        } else {
+            throw new RPCException("TCPNodeServer Launcher Fail");
         }
 
-        final ZookeeperManager finalZk = zk;
+        final NodeRegistry.CloseFuture future = closeFuture;
         return new NodeContext() {
             @Override
             public void close() {
-                if (finalZk != null) finalZk.stop();
+                if (future != null) future.close();
                 tcpNodeServer.close();
             }
 
             @Override
             public boolean isConnect() {
-                return tcpNodeServer.isConnect() && finalZk != null;
+                return tcpNodeServer.isConnect();
             }
         };
     }

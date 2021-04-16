@@ -4,7 +4,7 @@ import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.send.TCPRouteClient;
-import org.song.qsrpc.zk.NodeInfo;
+import org.song.qsrpc.discover.NodeInfo;
 
 /**
  * 连接池对象构造工厂
@@ -19,18 +19,16 @@ public class ClientFactory extends BasePoolableObjectFactory {
 
     /**
      * Creates a new instance of ClientChannelFactory.
-     *
-     * @param ip
-     * @param port
      */
     public ClientFactory(String ip, int port) {
-        this(ip, port, null);
-    }
-
-    public ClientFactory(String ip, int port, NodeInfo nodeInfo) {
         this.ip = ip;
         this.port = port;
+    }
+
+    public ClientFactory(NodeInfo nodeInfo) {
         this.nodeInfo = nodeInfo;
+        this.ip = nodeInfo.getIp();
+        this.port = nodeInfo.getPort();
     }
 
     @Override
@@ -67,4 +65,7 @@ public class ClientFactory extends BasePoolableObjectFactory {
         return false;
     }
 
+    public String getIpPort() {
+        return ip + ":" + port;
+    }
 }

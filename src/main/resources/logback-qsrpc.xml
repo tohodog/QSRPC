@@ -112,5 +112,5 @@
     <logger name="org.apache.zookeeper" level="INFO"/>
     <logger name="com.zaxxer.hikari" level="ERROR"/>
     <logger name="io.netty" level="INFO"/>
-
+    <logger name="io.grpc" level="INFO"/>
 </configuration>

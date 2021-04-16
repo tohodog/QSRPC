@@ -2,10 +2,7 @@ package org.song.qsrpc.send.cb;
 
 import org.song.qsrpc.RPCException;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * 回调的future实现
@@ -95,10 +92,10 @@ public class CallFuture<T> implements Future<T>, Callback<T> {
      * @see Future#get()
      */
     @Override
-    public T get() throws InterruptedException, RPCException {
+    public T get() throws InterruptedException, ExecutionException {
         latch.await();
         if (error != null) {
-            throw new RPCException(error);
+            throw new ExecutionException(error);
         }
         return result;
     }
@@ -108,14 +105,14 @@ public class CallFuture<T> implements Future<T>, Callback<T> {
      * @see Future#get(long, TimeUnit)
      */
     @Override
-    public T get(long timeout, TimeUnit unit) throws RPCException, InterruptedException {
+    public T get(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
         if (latch.await(timeout, unit)) {
             if (error != null) {
-                throw new RPCException(error);
+                throw new ExecutionException(error);
             }
             return result;
         } else {
-            throw new RPCException("CallFuture get time out: " + unit.toMillis(timeout));
+            throw new TimeoutException("CallFuture get time out: " + unit.toMillis(timeout));
         }
     }
 
