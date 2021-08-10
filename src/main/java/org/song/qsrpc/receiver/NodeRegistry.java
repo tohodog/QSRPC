@@ -4,9 +4,7 @@ package org.song.qsrpc.receiver;
 import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.RPCException;
 import org.song.qsrpc.ServerConfig;
-import org.song.qsrpc.discover.NacosManager;
-import org.song.qsrpc.discover.NodeInfo;
-import org.song.qsrpc.discover.ZookeeperManager;
+import org.song.qsrpc.discover.*;
 
 /**
  * @author song
@@ -37,55 +35,65 @@ public class NodeRegistry {
             nodeInfo.setName("def");
         }
 
-        String nacosAddr = ServerConfig.RPC_CONFIG.getNacosAddr();
-        String nacosServiceNam = ServerConfig.RPC_CONFIG.getNacosServiceName();
-        if (nacosAddr != null) {
-            return regNacos(nacosAddr, nacosServiceNam, nodeInfo);
-        }
+        IDiscover discover = DicoverFactory.newInstance(ServerConfig.RPC_CONFIG);
+        if (discover == null)
+            throw new NullPointerException(ServerConfig.KEY_RPC_NACOS_ADDR + "/" + ServerConfig.KEY_RPC_ZK_IPS + " is null");
 
-        String ips = ServerConfig.RPC_CONFIG.getZkIps();
-        String path = ServerConfig.RPC_CONFIG.getZkPath();
-        if (ips != null) {
-            return regZK(ips, path, nodeInfo);
-        }
-        throw new NullPointerException(ServerConfig.KEY_RPC_NACOS_ADDR + "/" + ServerConfig.KEY_RPC_ZK_IPS + " is null");
+        return reg(discover, nodeInfo);
     }
 
-    private static CloseFuture regNacos(String nacosAddr, String nacosServiceNam, NodeInfo nodeInfo) {
-        final NacosManager nacosManager = new NacosManager(nacosAddr, nacosServiceNam);
-        if (!nacosManager.register(nodeInfo)) {
-            throw new RPCException("NacosManager can not register:" + JSON.toJSONString(nodeInfo));
+    private static CloseFuture reg(final IDiscover discover, NodeInfo nodeInfo) {
+        if (!discover.register(nodeInfo)) {
+            throw new RPCException(discover.getClass().getSimpleName() + " can not register:" + JSON.toJSONString(nodeInfo));
         }
         return new CloseFuture() {
             @Override
             public void close() {
-                nacosManager.stop();
+                discover.stop();
             }
 
             @Override
             public boolean isConnect() {
-                return nacosManager.isConnect();
+                return discover.isConnect();
             }
         };
     }
 
-    private static CloseFuture regZK(String zkIps, String zkPath, NodeInfo nodeInfo) {
-        final ZookeeperManager zookeeperManager = new ZookeeperManager(zkIps, zkPath);
-        if (!zookeeperManager.register(nodeInfo)) {
-            throw new RPCException("Zookeeper can not createChildNode:" + JSON.toJSONString(nodeInfo));
-        }
-        return new CloseFuture() {
-            @Override
-            public void close() {
-                zookeeperManager.stop();
-            }
-
-            @Override
-            public boolean isConnect() {
-                return zookeeperManager.isConnect();
-            }
-        };
-    }
+//    private static CloseFuture regNacos(String nacosAddr, String nacosServiceNam, NodeInfo nodeInfo) {
+//        final NacosManager nacosManager = new NacosManager(nacosAddr, nacosServiceNam);
+//        if (!nacosManager.register(nodeInfo)) {
+//            throw new RPCException("NacosManager can not register:" + JSON.toJSONString(nodeInfo));
+//        }
+//        return new CloseFuture() {
+//            @Override
+//            public void close() {
+//                nacosManager.stop();
+//            }
+//
+//            @Override
+//            public boolean isConnect() {
+//                return nacosManager.isConnect();
+//            }
+//        };
+//    }
+//
+//    private static CloseFuture regZK(String zkIps, String zkPath, NodeInfo nodeInfo) {
+//        final ZookeeperManager zookeeperManager = new ZookeeperManager(zkIps, zkPath);
+//        if (!zookeeperManager.register(nodeInfo)) {
+//            throw new RPCException("Zookeeper can not createChildNode:" + JSON.toJSONString(nodeInfo));
+//        }
+//        return new CloseFuture() {
+//            @Override
+//            public void close() {
+//                zookeeperManager.stop();
+//            }
+//
+//            @Override
+//            public boolean isConnect() {
+//                return zookeeperManager.isConnect();
+//            }
+//        };
+//    }
 
     public interface CloseFuture {
         void close();
