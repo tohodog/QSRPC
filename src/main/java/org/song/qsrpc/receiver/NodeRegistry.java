@@ -71,7 +71,7 @@ public class NodeRegistry {
 
     private static CloseFuture regZK(String zkIps, String zkPath, NodeInfo nodeInfo) {
         final ZookeeperManager zookeeperManager = new ZookeeperManager(zkIps, zkPath);
-        if (!zookeeperManager.createChildNode(nodeInfo.id(), JSON.toJSONString(nodeInfo).getBytes())) {
+        if (!zookeeperManager.register(nodeInfo)) {
             throw new RPCException("Zookeeper can not createChildNode:" + JSON.toJSONString(nodeInfo));
         }
         return new CloseFuture() {

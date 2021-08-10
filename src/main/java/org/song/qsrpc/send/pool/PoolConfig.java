@@ -102,10 +102,8 @@ public class PoolConfig {
 
     /**
      * 获取对象池配置
-     *
-     * @return
      */
-    public GenericObjectPool.Config getPoolConfig() {
+    public GenericObjectPool.Config buildConfig() {
         GenericObjectPool.Config poolConfig = new GenericObjectPool.Config();
         // maxIdle为负数时，不对pool size大小做限制，
         if (this.maxIdle >= 0) {

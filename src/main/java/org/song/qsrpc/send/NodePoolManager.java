@@ -1,17 +1,14 @@
 package org.song.qsrpc.send;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.nacos.api.exception.NacosException;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.ServerConfig;
+import org.song.qsrpc.discover.*;
 import org.song.qsrpc.send.pool.ClientFactory;
 import org.song.qsrpc.send.pool.ClientPool;
 import org.song.qsrpc.send.pool.PoolConfig;
-import org.song.qsrpc.discover.NacosManager;
-import org.song.qsrpc.discover.NodeInfo;
-import org.song.qsrpc.discover.ZookeeperManager;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -29,8 +26,7 @@ public class NodePoolManager {
 
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private ZookeeperManager zookeeperManager;
-    private NacosManager nacosManager;
+    private IDiscover discover;
 
 
     // 所有节点的连接池
@@ -42,65 +38,31 @@ public class NodePoolManager {
 
     public void initNodePool() {
 
-        String nacosAddr = ServerConfig.RPC_CONFIG.getNacosAddr();
-        String nacosServiceNam = ServerConfig.RPC_CONFIG.getNacosServiceName();
-        if (nacosAddr != null) {
-            initNacos(nacosAddr, nacosServiceNam);
-            return;
-        }
-
-        String ips = ServerConfig.RPC_CONFIG.getZkIps();
-        String path = ServerConfig.RPC_CONFIG.getZkPath();
-        if (ips != null) {
-            initZK(ips, path);
-        }
-
-    }
-
-    private void initNacos(String nacosAddr, String nacosServiceName) {
-        nacosManager = new NacosManager(nacosAddr, nacosServiceName);
-        nacosManager.watchNode(new NacosManager.WatchNode() {
-            @Override
-            public void onNodeChange(List<NodeInfo> nodeInfoList) {
-                List<String> serverList = new ArrayList<>();
-                //新增的服务节点
-                List<NodeInfo> newNodeInfos = new ArrayList<>();
-                for (NodeInfo nodeInfo : nodeInfoList) {
-                    serverList.add(nodeInfo.id());
-                    if (!clientPoolMap.containsKey(nodeInfo.id())) {
-                        logger.info("addNode->" + JSON.toJSONString(nodeInfo));
-                        newNodeInfos.add(nodeInfo);
-                    }
-                }
-                handleNodeChange(serverList, newNodeInfos);
-            }
-        });
-    }
-
-    private void initZK(String ips, String path) {
-        if (zookeeperManager != null) zookeeperManager.stop();
-        zookeeperManager = new ZookeeperManager(ips, path);
-        zookeeperManager.watchNode(new ZookeeperManager.WatchNode() {
-            //监听节点信息
-            @Override
-            public void onNodeChange(List<String> serverList) {
-                try {
-                    //新增的服务节点
-                    List<NodeInfo> newNodeInfos = new ArrayList<>();
-                    for (String server : serverList) {
-                        if (!clientPoolMap.containsKey(server)) {
-                            String nodeData = new String(zookeeperManager.getNodeData(server));
-                            NodeInfo nodeInfo = JSON.parseObject(nodeData, NodeInfo.class);
-                            logger.info("addNode->" + JSON.toJSONString(nodeInfo));
-                            if (nodeInfo != null && nodeInfo.getIp() != null) newNodeInfos.add(nodeInfo);
+        discover = DicoverFactory.newInstance(ServerConfig.RPC_CONFIG);
+        if (discover == null) {
+            logger.warn("discover is null");
+        } else {
+            discover.watchIndex(new Watcher<String>() {
+                //监听节点信息
+                @Override
+                public void onNodeChange(List<String> serverList) {
+                    try {
+                        //新增的服务节点
+                        List<NodeInfo> newNodeInfos = new ArrayList<>();
+                        for (String server : serverList) {
+                            if (!clientPoolMap.containsKey(server)) {
+                                NodeInfo nodeInfo = discover.getNode(server);
+                                logger.info("addNode->" + JSON.toJSONString(nodeInfo));
+                                if (nodeInfo != null && nodeInfo.getIp() != null) newNodeInfos.add(nodeInfo);
+                            }
                         }
+                        handleNodeChange(serverList, newNodeInfos);
+                    } catch (Throwable e) {
+                        logger.error("onNodeChange.ERROR", e);
                     }
-                    handleNodeChange(serverList, newNodeInfos);
-                } catch (Exception e) {
-                    logger.error("onNodeChange.ERROR", e);
                 }
-            }
-        });
+            });
+        }
     }
 
     private void handleNodeChange(final List<String> serverList, List<NodeInfo> nodeDatas) {
@@ -111,8 +73,9 @@ public class NodePoolManager {
             for (NodeInfo nodeInfo : nodeDatas) {
                 String id = nodeInfo.id();
                 if (!clientPoolMap.containsKey(id)) {
-                    clientPoolMap.put(nodeInfo.id(), buildClientPool(nodeInfo));
-                    logger.info("createClientPool:" + id);
+                    ClientPool clientPool;
+                    clientPoolMap.put(nodeInfo.id(), clientPool = buildClientPool(nodeInfo));
+                    logger.info("createClientPool:" + clientPool);
                 }
             }
 

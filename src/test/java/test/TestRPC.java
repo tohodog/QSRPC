@@ -57,11 +57,11 @@ public class TestRPC extends TestCase {
 //        ServerConfig.RPC_CONFIG.setZkPath("/qsrpc");
 
         //open node server 1
-        NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
+        final NodeInfo nodeInfo = NodeRegistry.buildNode();//read application.properties
         NodeLauncher.start(nodeInfo, new MessageListener() {
             @Override
             public byte[] onMessage(Async async, byte[] message) {
-                return ("Hello! node1 callback -" + new String(message)).getBytes();
+                return ("Hello! " + nodeInfo.getPort() + " callback -" + new String(message)).getBytes();
             }
         });
 
@@ -69,7 +69,7 @@ public class TestRPC extends TestCase {
         NodeInfo nodeInfo2 = new NodeInfo();
         nodeInfo2.setAction("order");
         nodeInfo2.setIp("127.0.0.1");
-        nodeInfo2.setPort(8848);
+        nodeInfo2.setPort(10086);
         nodeInfo2.setWeight((byte) 2);
 
         NodeLauncher.start(nodeInfo2, new MessageListener() {
@@ -78,7 +78,29 @@ public class TestRPC extends TestCase {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        async.callBack(("Hello! node2 callback -" + new String(message)).getBytes());
+                        async.callBack(("Hello! 10086 callback -" + new String(message)).getBytes());
+                    }
+                }).start();
+                return null;
+            }
+        });
+
+        Thread.sleep(3000);
+
+        //open node server 2
+        NodeInfo nodeInfo3 = new NodeInfo();
+        nodeInfo3.setAction("order");
+        nodeInfo3.setIp("127.0.0.1");
+        nodeInfo3.setPort(10087);
+        nodeInfo3.setWeight((byte) 1);
+
+        NodeLauncher.start(nodeInfo3, new MessageListener() {
+            @Override
+            public byte[] onMessage(final Async async, final byte[] message) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        async.callBack(("Hello! 10087 callback -" + new String(message)).getBytes());
                     }
                 }).start();
                 return null;
