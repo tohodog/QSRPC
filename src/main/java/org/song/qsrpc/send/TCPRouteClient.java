@@ -85,8 +85,8 @@ public class TCPRouteClient {
             bootstrap.option(ChannelOption.SO_KEEPALIVE, soKeepalive);
             bootstrap.option(ChannelOption.SO_REUSEADDR, soReuseaddr);
             bootstrap.option(ChannelOption.TCP_NODELAY, tcpNodelay);
-            bootstrap.option(ChannelOption.SO_RCVBUF, soRcvbuf);
-            bootstrap.option(ChannelOption.SO_SNDBUF, soSndbuf);
+//            bootstrap.option(ChannelOption.SO_RCVBUF, soRcvbuf);
+//            bootstrap.option(ChannelOption.SO_SNDBUF, soSndbuf);
 
             bootstrap.group(bossGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
                 @Override

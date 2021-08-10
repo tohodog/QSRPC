@@ -24,7 +24,7 @@ public class NodeLauncher {
         return new NodeContext() {
             @Override
             public void close() {
-                if (future != null) future.close();
+                future.close();
                 tcpNodeServer.close();
             }
 
