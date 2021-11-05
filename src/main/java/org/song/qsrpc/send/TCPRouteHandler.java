@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.song.qsrpc.Message;
+import org.song.qsrpc.ServerConfig;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
 
@@ -21,13 +22,14 @@ public class TCPRouteHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
-
-        //System.out.println("TCPRouteHandler-HandlerMessage:" + msg.getId() + "-" + Thread.currentThread().getName());
+        if (ServerConfig.RPC_CONFIG.isPrintLog()) {
+            logger.debug("callMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
+        }
         @SuppressWarnings("unchecked")
         Callback<Message> cb = (Callback<Message>) CallbackPool.remove(msg.getId());
         if (cb == null) {
             //找不到回调//可能超时被清理了
-            logger.warn("Receive msg from server but no context found, requestId=" + msg.getId() + "," + ctx);
+            logger.warn("Receive msg from server but not context found, requestId=" + msg.getId() + "," + ctx);
             return;
         }
         cb.handleResult(msg);

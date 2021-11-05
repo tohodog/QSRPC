@@ -71,8 +71,8 @@ public class NacosManager implements IDiscover {
         instanceIndex.setPort(nodeInfo.getPort());
         instanceIndex.setClusterName(nodeInfo.id());
         try {
-            namingService.registerInstance(serviceIndexName, instanceIndex);
             namingService.registerInstance(serviceName, instanceNode);
+            namingService.registerInstance(serviceIndexName, instanceIndex);
             logger.info("registerInstance-> " + serviceName + "=" + JSON.toJSONString(instanceNode));
             return true;
         } catch (NacosException e) {
