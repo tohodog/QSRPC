@@ -116,8 +116,9 @@ public class RPCClientManager {
                     // 所以要有qps限制,1放在服务端拦截 2放在这里就设置getResource一秒超时,建议1,也就是
                     clientPool.returnResource(tcpClient);
                 }
-                if (ServerConfig.RPC_CONFIG.isPrintLog())
-                    logger.info("sendMessage:" + action + ", id:" + request.getId() + ", channel:" + tcpClient.getInfo());
+                if (ServerConfig.RPC_CONFIG.isPrintLog()) {
+                    logger.debug("sendMessage:" + action + ", id:" + request.getId() + ", channel:" + tcpClient.getInfo());
+                }
             } else {
                 callback.handleError(new RPCException("Can not get client from pool:" + action + "," + clientPool.toString()));
             }

@@ -49,7 +49,10 @@ public class RPCConfig {
      * 客户端 请求超时
      */
     private int clientTimeout;
-
+    /**
+     * 客户端 请求线程数
+     */
+    private int clientThread;
 
     /**
      * 节点 IP
@@ -159,6 +162,14 @@ public class RPCConfig {
 
     public void setClientTimeout(int clientTimeout) {
         this.clientTimeout = clientTimeout;
+    }
+
+    public int getClientThread() {
+        return clientThread;
+    }
+
+    public void setClientThread(int clientThread) {
+        this.clientThread = clientThread;
     }
 
     public String getNodeIp() {

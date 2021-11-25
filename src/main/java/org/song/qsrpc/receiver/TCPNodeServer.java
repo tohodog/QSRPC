@@ -38,12 +38,12 @@ public class TCPNodeServer {
             // BACKLOG用于构造服务端套接字ServerSocket对象，标识当服务器请求处理线程全满时，用于临时存放已完成三次握手的请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50
             b.option(ChannelOption.SO_BACKLOG, 1024);
             // 是否启用心跳保活机制。在双方TCP套接字建立连接后（即都进入ESTABLISHED状态）如果在两小时内没有数据的通信时，TCP会自动发送一个活动探测数据报文
-            b.option(ChannelOption.SO_KEEPALIVE, true);
+            b.childOption(ChannelOption.SO_KEEPALIVE, true);
             // 用于启用或关闭Nagle算法。如果要求高实时性，有数据发送时就马上发送，就将该选项设置为true关闭Nagle算法；如果要减少发送次数减少网络交互，就设置为false等累积一定大小后再发送。默认为false。
-            b.option(ChannelOption.TCP_NODELAY, false);
+            b.childOption(ChannelOption.TCP_NODELAY, false);
             // 缓冲区大小
-            b.option(ChannelOption.SO_RCVBUF, 256 * 1024);
-            b.option(ChannelOption.SO_SNDBUF, 256 * 1024);
+//            b.childOption(ChannelOption.SO_RCVBUF, 256 * 1024);
+//            b.childOption(ChannelOption.SO_SNDBUF, 256 * 1024);
 
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     // .handler(new LoggingHandler(LogLevel.INFO)) //日记
