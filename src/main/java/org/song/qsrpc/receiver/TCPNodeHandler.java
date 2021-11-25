@@ -29,9 +29,9 @@ public class TCPNodeHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final Message msg) throws Exception {
-        if (ServerConfig.RPC_CONFIG.isPrintLog())
-            logger.info("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
-
+        if (ServerConfig.RPC_CONFIG.isPrintLog()) {
+            logger.debug("receiverMessage-id:" + msg.getId() + ", channel:" + ctx.channel());
+        }
         Runnable work = new Runnable() {
 
             private boolean flag;

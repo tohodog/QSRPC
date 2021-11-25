@@ -8,10 +8,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import org.song.qsrpc.Message;
-import org.song.qsrpc.MessageDecoder;
-import org.song.qsrpc.MessageEncoder;
-import org.song.qsrpc.RPCException;
+import org.song.qsrpc.*;
 import org.song.qsrpc.send.cb.CallFuture;
 import org.song.qsrpc.send.cb.Callback;
 import org.song.qsrpc.send.cb.CallbackPool;
@@ -47,6 +44,7 @@ public class TCPRouteClient {
     private String ip;
     private int port;
     private byte zip, ver;//请求节点的配置
+    private int clientThread;
 
     private SslContext sslContext;
 
@@ -65,6 +63,8 @@ public class TCPRouteClient {
     public TCPRouteClient(String ip, int port, NodeInfo nodeInfo) {
         this.ip = ip;
         this.port = port;
+        this.clientThread = ServerConfig.RPC_CONFIG.getClientThread();
+        if (this.clientThread < 1) this.clientThread = 1;
         if (nodeInfo != null) {
             this.zip = Zip.getInt(nodeInfo.getZip());
             this.ver = nodeInfo.getVer();
@@ -79,14 +79,14 @@ public class TCPRouteClient {
         if (isConnect())
             return;
         try {
-            bossGroup = new NioEventLoopGroup(zip == 0 ? 1 : 1);//有压缩增加线程数...待定
+            bossGroup = new NioEventLoopGroup(clientThread);
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connTimeout);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, soKeepalive);
             bootstrap.option(ChannelOption.SO_REUSEADDR, soReuseaddr);
             bootstrap.option(ChannelOption.TCP_NODELAY, tcpNodelay);
-            bootstrap.option(ChannelOption.SO_RCVBUF, soRcvbuf);
-            bootstrap.option(ChannelOption.SO_SNDBUF, soSndbuf);
+//            bootstrap.option(ChannelOption.SO_RCVBUF, soRcvbuf);
+//            bootstrap.option(ChannelOption.SO_SNDBUF, soSndbuf);
 
             bootstrap.group(bossGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
                 @Override

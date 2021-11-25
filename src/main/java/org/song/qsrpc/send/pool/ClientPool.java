@@ -1,5 +1,6 @@
 package org.song.qsrpc.send.pool;
 
+import com.alibaba.fastjson.JSON;
 import org.song.qsrpc.send.TCPRouteClient;
 import org.song.qsrpc.discover.NodeInfo;
 
@@ -36,13 +37,15 @@ public class ClientPool extends Pool<TCPRouteClient> {
      */
     private boolean queue;//
     private NodeInfo nodeInfo;
+    private PoolConfig poolConfig;
 
     public ClientPool(PoolConfig poolConfig, ClientFactory factory) {
         this(poolConfig, factory, null);
     }
 
     public ClientPool(PoolConfig poolConfig, ClientFactory factory, NodeInfo nodeInfo) {
-        super(poolConfig.getPoolConfig(), factory);
+        super(poolConfig.buildConfig(), factory);
+        this.poolConfig = poolConfig;
         if (nodeInfo != null) {
             this.nodeInfo = nodeInfo;
             this.queue = nodeInfo.isQueue();
@@ -58,7 +61,7 @@ public class ClientPool extends Pool<TCPRouteClient> {
     }
 
     public String toString() {
-        return "ClientPool(" + nodeInfo.id() + ")";
+        return "ClientPool(" + nodeInfo.id() + "," + JSON.toJSONString(poolConfig) + ")";
     }
 
     //待验证功能,和预想不一样
