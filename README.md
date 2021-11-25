@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.github.tohodog</groupId>
     <artifactId>qsrpc</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
@@ -172,7 +172,7 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 
 
 ## Log
-### v1.2.1(2021-11-25)
+### v1.3.0(2021-11-25)
   * 重构服务发现模块
   * 优化nacos,使用index,增量拉取节点信息
   * 升级依赖
