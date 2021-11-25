@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.github.tohodog</groupId>
     <artifactId>qsrpc</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
@@ -47,6 +47,7 @@ qsrpc.node.port=19980
 qsrpc.node.action=user,order
 #qsrpc.node.weight=1
 #qsrpc.node.zip=snappy/gzip
+#qsrpc.connect.timeout=60000
 ```
 
 ### Node
@@ -166,11 +167,16 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 　客户端Pool的maxIdle(maxActive)=服务节点配置的CPU线程数*2=服务节点netty的工作线程数,pool采用FIFO先行先出的策略,可以保证在高并发下均匀的使用tcp连接,服务端就不用再次分发消息了
 ### 3. 服务注册发现
 　分布式系统中都需要一个配置/服务中心,才能进行统一管理.本框架目前使用zookeeper(已支持nacos)进行服务注册,zookeeper是使用类似文件目录的结构,每个目录都可以存一个data
-<br>　节点注册是使用[IP:PROT_TIME]作为目录名,data存了节点的json数据,创建模式为EPHEMERAL_SEQUENTIAL(断开后会删除该目录),这样就达到了自动监听节点上下线的效果,加入时间戳是为了解决当节点快速重启时,注册了两个目录,便于进行区分处理
+<br>　节点注册是使用[IP:PROT_NAME_TIME]作为目录名,data存了节点的json数据,创建模式为EPHEMERAL_SEQUENTIAL(断开后会删除该目录),这样就达到了自动监听节点上下线的效果,加入时间戳是为了解决当节点快速重启时,注册了两个目录,便于进行区分处理
 <br>　客户端通过watch目录变化信息,从而获取到所有服务节点信息,同步一个副本到本地Map里(需加上读写锁),客户端就可以实现高效调用对应的服务了
 
 
 ## Log
+### v1.2.1(2021-11-25)
+  * 重构服务发现模块
+  * 优化nacos,使用index,增量拉取节点信息
+  * 升级依赖
+  * 其他优化...
 ### v1.2.0(2021-04-16)
   * 支持Nacos 2.0
   * 优化zk服务发现性能 
@@ -205,10 +211,10 @@ Run [TestConcurrent.java][testjava] (Don't open the console and 360 antivirus et
 [testpng2]: https://gitee.com/sakaue/QSRPC/raw/master/test2.png
 
 
-[nettysvg]: https://img.shields.io/badge/netty-4.1.42-greed.svg
+[nettysvg]: https://img.shields.io/badge/netty-4.1.70-greed.svg
 [netty]: https://github.com/netty/netty
 
-[nacossvg]: https://img.shields.io/badge/nacos-2.0.0-2EBBFB.svg
+[nacossvg]: https://img.shields.io/badge/nacos-2.0.3-2EBBFB.svg
 [nacos]: https://github.com/alibaba/nacos
 
 
