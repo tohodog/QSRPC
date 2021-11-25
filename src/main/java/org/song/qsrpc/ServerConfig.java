@@ -20,6 +20,7 @@ public class ServerConfig {
 
     public final static String KEY_RPC_CFG_LOG = "qsrpc.cfg.log";
     public final static String KEY_RPC_CONNECT_TIMEOUT = "qsrpc.connect.timeout";
+    public final static String KEY_RPC_CONNECT_THREAD = "qsrpc.connect.thread";
 
     public final static String KEY_RPC_ZK_IPS = "qsrpc.zk.ips";
     public final static String KEY_RPC_ZK_PATH = "qsrpc.zk.path";
@@ -63,6 +64,7 @@ public class ServerConfig {
             RPC_CONFIG.setNacosServiceName(getString(KEY_RPC_NACOS_SRVNAME, "qsrpc"));
 
             RPC_CONFIG.setClientTimeout(getInt(KEY_RPC_CONNECT_TIMEOUT, 60 * 1000));
+            RPC_CONFIG.setClientThread(getInt(KEY_RPC_CONNECT_THREAD, 1));
 
             RPC_CONFIG.setNodeName(getString(KEY_RPC_NODE_NAME));
             RPC_CONFIG.setNodeIp(getString(KEY_RPC_NODE_IP));

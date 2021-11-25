@@ -32,7 +32,7 @@ public class NodeRegistry {
             throw new NullPointerException(ServerConfig.KEY_RPC_NODE_ACTION + " is null");
 
         if (nodeInfo.getName() == null) {
-            nodeInfo.setName(nodeIp + ":" + port);
+            nodeInfo.setName("qsrpc");
         }
 
         IDiscover discover = DicoverFactory.newInstance(ServerConfig.RPC_CONFIG);
